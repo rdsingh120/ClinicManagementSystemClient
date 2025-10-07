@@ -42,7 +42,10 @@ const SignUpPage = () => {
     }
 
     try {
-      const { data } = await axios.post('api/signup', user)
+      const { data } = await axios.post(
+        'http://localhost:3000/api/signup',
+        user
+      )
       if (data.success) {
         navigate('/signin')
         return toast.success(data.message)
@@ -116,7 +119,7 @@ const SignUpPage = () => {
         />
         <input
           type="submit"
-          value={'Sign Un'}
+          value={'Sign Up'}
           className="bg-blue-500 px-4 py-2 text-white font-medium cursor-pointer"
         />
         <p className="text-center mt-2">
