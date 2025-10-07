@@ -1,7 +1,15 @@
-import logo from '../assets/logo.png'
 import { GiHamburgerMenu } from 'react-icons/gi'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
-const Navbar = () => {
+const Navbar = ({name, role}) => {
+  const navigate = useNavigate()
+  const HandleSignOut = (e) => {
+    e.preventDefault()
+    localStorage.removeItem('token')
+    toast.success("SignOut Successful")
+    return navigate('/signin')
+  }
   return (
     <div className="bg-blue-500 h-[100px] pl-5 md:px-20 sticky top-0 flex justify-between">
       {/* Logo */}
@@ -22,12 +30,18 @@ const Navbar = () => {
           className="w-10 h-10 rounded"
         />
         <div className="flex flex-col">
-          <span className="text-xs md:text-sm lg:text-base text-white font-medium">John Doe</span>
-          <span className="text-xs md:text-sm lg:text-base text-white">Patient</span>
+          <span className="text-xs md:text-sm lg:text-base text-white font-medium">
+            {name}
+          </span>
+          <span className="text-xs md:text-sm lg:text-base text-white">
+            {role}
+          </span>
         </div>
+        <button onClick={HandleSignOut} className="bg-white px-4 py-1">
+          Sign Out
+        </button>
 
-        <GiHamburgerMenu className='text-white text-2xl mr-5 md:hidden cursor-pointer'/>
-
+        <GiHamburgerMenu className="text-white text-2xl mr-5 md:hidden cursor-pointer" />
       </div>
     </div>
   )
