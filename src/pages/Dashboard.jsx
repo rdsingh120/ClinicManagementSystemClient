@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import Footer from '../components/footer'
-import MainContent from '../components/MainContent'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/sidebar'
 import axios from 'axios'
@@ -33,7 +32,6 @@ const Dashboard = () => {
     fetchUser(userId)
   }, [userId])
 
-  console.log(user);
   
 const fullName = `${user?.firstName} ${user?.lastName}`
   return (
