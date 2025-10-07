@@ -1,4 +1,5 @@
 import { CgProfile } from 'react-icons/cg'
+import { FaBriefcaseMedical } from 'react-icons/fa6'
 import { useNavigate } from 'react-router-dom'
 
 const Sidebar = () => {
@@ -12,6 +13,14 @@ const Sidebar = () => {
         >
           <CgProfile className="text-xl" />
           <span className="text-lg">Profile</span>
+        </div>
+
+        <div
+          onClick={() => navigate('/dashboard/medical-details')}
+          className="bg-white rounded-lg px-4 py-1 cursor-pointer flex items-center gap-5"
+        >
+          <FaBriefcaseMedical className="text-xl" />
+          <span className="text-lg">Medical Details</span>
         </div>
       </div>
     </div>
