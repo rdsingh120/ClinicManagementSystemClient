@@ -22,6 +22,7 @@ const LoginPage = () => {
     try {
       const { data } = await axios.post('api/signin', user)
       if (data.success) {
+        navigate('/dashboard')
         return toast.success(data.message)
       }
     } catch (error) {
