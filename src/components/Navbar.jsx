@@ -1,8 +1,9 @@
 import logo from '../assets/logo.png'
+import { GiHamburgerMenu } from 'react-icons/gi'
 
 const Navbar = () => {
   return (
-    <div className="bg-blue-500 h-[100px] px-10 md:px-20 flex justify-between">
+    <div className="bg-blue-500 h-[100px] pl-5 md:px-20 sticky top-0 flex justify-between">
       {/* Logo */}
       <div className="flex flex-col justify-center items-center text-white">
         <span className="font-bold text-xl md:text-2xl lg:text-3xl">
@@ -24,6 +25,9 @@ const Navbar = () => {
           <span className="text-xs md:text-sm lg:text-base text-white font-medium">John Doe</span>
           <span className="text-xs md:text-sm lg:text-base text-white">Patient</span>
         </div>
+
+        <GiHamburgerMenu className='text-white text-2xl mr-5 md:hidden cursor-pointer'/>
+
       </div>
     </div>
   )
