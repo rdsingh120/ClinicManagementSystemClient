@@ -6,6 +6,7 @@ import SignInPage from './pages/SignInPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import ProfilePage from './pages/ProfilePage'
+import MedicalDetails from './pages/MedicalDetails'
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
           }
         >
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="medical-details" element={<MedicalDetails />} />
         </Route>
       </Routes>
       <ToastContainer
