@@ -13,6 +13,14 @@ const App = () => {
     <>
       <Routes>
         <Route
+          path="*"
+          element={
+            <PublicRoute>
+              <SignInPage />
+            </PublicRoute>
+          }
+        />
+        <Route
           path="/signin"
           element={
             <PublicRoute>
