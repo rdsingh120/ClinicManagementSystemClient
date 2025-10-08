@@ -5,8 +5,8 @@ import Dashboard from './pages/Dashboard'
 import SignInPage from './pages/SignInPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
-import ProfilePage from './pages/ProfilePage'
-import MedicalDetails from './pages/MedicalDetails'
+import UpdateProfile from './pages/UpdateProfile'
+import Profile from './pages/Profile'
 
 const App = () => {
   return (
@@ -44,8 +44,8 @@ const App = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="medical-details" element={<MedicalDetails />} />
+          <Route path="" element={<Profile />} />
+          <Route path="profile" element={<UpdateProfile />} />
         </Route>
       </Routes>
       <ToastContainer
