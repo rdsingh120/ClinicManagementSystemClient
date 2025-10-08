@@ -1,4 +1,36 @@
+import { useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
+
 const MedicalDetails = () => {
+  const [input, setInput] = useState({
+    healthCardNumber: '',
+    dob: '',
+    sex: '',
+    bloodGroup: '',
+    organDonar: false,
+  })
+  const { user } = useOutletContext()
+
+  useEffect(() => {
+    if (user) {
+      const patientProfile = user.patientProfile || {}
+      setInput({
+        healthCardNumber: patientProfile.healthCardNumber || '',
+        dob: patientProfile.dob || '',
+        sex: patientProfile.sex || '',
+        bloodGroup: patientProfile.bloodGroup || '',
+        organDonar: patientProfile.organDonar || false,
+      })
+    }
+  }, [user])
+
+  const handleInputState = (e) => {
+    const { name, value, type, checked } = e.target
+    setInput((prev) => {
+      return { ...prev, [name]: type == 'checkbox' ? checked : value }
+    })
+  }
+
   return (
     <div className="bg-white flex-1 p-6 overflow-y-auto rounded-tl-2xl">
       <form
@@ -12,7 +44,8 @@ const MedicalDetails = () => {
           type="text"
           placeholder="Health Card Number"
           name="healthCardNumber"
-          value=""
+          value={input.healthCardNumber}
+          onChange={handleInputState}
           className="border border-black px-4 py-2 w-full"
         />
 
@@ -20,13 +53,15 @@ const MedicalDetails = () => {
           <input
             type="date"
             name="dob"
-            value=""
+            value={input.dob}
+            onChange={handleInputState}
             className="border border-black px-4 py-2 w-full h-[43px]"
           />
 
           <select
             name="sex"
-            defaultValue=""
+            value={input.sex}
+            onChange={handleInputState}
             className="border border-black px-4 py-2 w-full"
           >
             <option value="" disabled hidden>
@@ -39,8 +74,9 @@ const MedicalDetails = () => {
 
         <div className="w-full flex gap-2">
           <select
-            defaultValue=""
             name="bloodGroup"
+            value={input.bloodGroup}
+            onChange={handleInputState}
             className="border border-black px-4 py-2 w-full"
           >
             <option value="" disabled hidden>
@@ -60,7 +96,13 @@ const MedicalDetails = () => {
           <label htmlFor="">
             In the event of my death, I concent to donate my organs
           </label>
-          <input type="checkbox" name="isOrganDonor" id="" />
+          <input
+            type="checkbox"
+            checked={input.organDonar}
+            onChange={handleInputState}
+            name="isOrganDonor"
+            id=""
+          />
         </div>
         <input
           type="submit"
