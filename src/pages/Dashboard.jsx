@@ -11,25 +11,34 @@ const Dashboard = () => {
   const token = localStorage.getItem('token')
 
   const fetchUserId = async () => {
-    const { data } = await axios.get('http://localhost:3000/api/dashboard', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    try {
+      const { data } = await axios.get('http://localhost:3000/api/dashboard', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      setUserId(data?.user?.id)
 
-    setUserId(data?.user?.id)
+    } catch (error) {
+      console.log(error.message);
+      
+    }
   }
 
   const fetchUser = async (id) => {
-    const { data } = await axios.get(`http://localhost:3000/api/user/${id}`)
-    setUser(data?.user)
+    try {
+      const { data } = await axios.get(`http://localhost:3000/api/user/${id}`)
+      setUser(data?.user)
+    } catch (error) {
+      console.log(error.message)
+    }
   }
   useEffect(() => {
     fetchUserId()
   }, [])
 
   useEffect(() => {
-    fetchUser(userId)
+    if(userId) fetchUser(userId)
   }, [userId])
 
   
