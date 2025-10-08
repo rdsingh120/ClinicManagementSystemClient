@@ -42,6 +42,7 @@ const ProfilePage = () => {
       lastName: input.lastName,
       email: input.email,
       patientProfile: {
+        ...(user.patientProfile || {}),
         phone: input.phone,
         address: input.address,
       },
