@@ -1,5 +1,8 @@
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { toast } from 'react-toastify'
+
 
 const MedicalDetails = () => {
   const [input, setInput] = useState({
@@ -7,7 +10,7 @@ const MedicalDetails = () => {
     dob: '',
     sex: '',
     bloodGroup: '',
-    organDonar: false,
+    isOrganDonor: false,
   })
   const { user } = useOutletContext()
 
@@ -15,11 +18,12 @@ const MedicalDetails = () => {
     if (user) {
       const patientProfile = user.patientProfile || {}
       setInput({
+        ...(user.patientProfile || {}),
         healthCardNumber: patientProfile.healthCardNumber || '',
-        dob: patientProfile.dob || '',
+        dob: patientProfile.dob?.split('T')[0] || '',
         sex: patientProfile.sex || '',
         bloodGroup: patientProfile.bloodGroup || '',
-        organDonar: patientProfile.organDonar || false,
+        isOrganDonor: patientProfile.isOrganDonor || false,
       })
     }
   }, [user])
@@ -31,11 +35,35 @@ const MedicalDetails = () => {
     })
   }
 
+  const updateMedicalDetails = async (e) => {
+    e.preventDefault()
+    const payload = {
+      patientProfile: {
+        ...(user.patientProfile || {}),
+        healthCardNumber: input.healthCardNumber,
+        dob: input.dob,
+        sex: input.sex,
+        bloodGroup: input.bloodGroup,
+        isOrganDonor: input.isOrganDonor,
+      },
+    }
+    try {
+      const { data } = await axios.put(
+        `http://localhost:3000/api/user/${user._id}`,
+        payload
+      )
+      return toast.success(data.message)
+    } catch (error) {
+      return toast.error(error.message)
+    }
+  }
+
   return (
     <div className="bg-white flex-1 p-6 overflow-y-auto rounded-tl-2xl">
       <form
         action=""
         className="max-w-[600px] mx-auto flex flex-col items-center gap-5 p-5 rounded"
+        onSubmit={updateMedicalDetails}
       >
         <h1 className="text-2xl text-center text-black font-bold">
           Update Your Profile
@@ -98,10 +126,9 @@ const MedicalDetails = () => {
           </label>
           <input
             type="checkbox"
-            checked={input.organDonar}
+            checked={input.isOrganDonor}
             onChange={handleInputState}
             name="isOrganDonor"
-            id=""
           />
         </div>
         <input
