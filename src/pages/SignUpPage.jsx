@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { useUserStore } from '../store/user.store'
+import { signUpUser } from '../api/user.api'
 
 const SignUpPage = () => {
   const navigate = useNavigate()
@@ -14,25 +14,13 @@ const SignUpPage = () => {
     password: '',
   })
 
-  const { signUpUser } = useUserStore()
   const handleUserState = (e) =>
     setUser({ ...user, [e.target.name]: e.target.value })
 
   const handleSignUp = async (e) => {
     e.preventDefault()
 
-    try {
-      const data = await signUpUser(user)
-      if (data.success) {
-        navigate('/signin')
-        return toast.success(data.message)
-      }
-      else {
-        return toast.error(data.message)
-      }
-    } catch (error) {
-      return toast.error(error.message)
-    }
+    const data = await signUpUser(user)
   }
 
   return (
