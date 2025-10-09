@@ -1,11 +1,14 @@
+import { useContext } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
+import { UserContext } from '../context/UserContext'
 
 const Profile = () => {
-  const { user } = useOutletContext()
+  const { user } = useContext(UserContext)
   const navigate = useNavigate()
 
-  if (Object.keys(user).length === 0) {
+
+  if (!user) {
     return <div>Loading...</div>
   }
 
