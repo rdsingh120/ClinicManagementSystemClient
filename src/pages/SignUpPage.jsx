@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useUserStore } from '../store/user.store'
 
 const SignUpPage = () => {
   const navigate = useNavigate()
@@ -14,41 +14,21 @@ const SignUpPage = () => {
     password: '',
   })
 
+  const { signUpUser } = useUserStore()
   const handleUserState = (e) =>
     setUser({ ...user, [e.target.name]: e.target.value })
 
   const handleSignUp = async (e) => {
     e.preventDefault()
-    if (
-      !user.firstName ||
-      !user.lastName ||
-      !user.email ||
-      !user.confirmEmail ||
-      !user.password
-    ) {
-      return toast.error(
-        'please complete all the fields with valid information',
-        {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'colored',
-        }
-      )
-    }
 
     try {
-      const { data } = await axios.post(
-        'http://localhost:3000/api/signup',
-        user
-      )
+      const data = await signUpUser(user)
       if (data.success) {
         navigate('/signin')
         return toast.success(data.message)
+      }
+      else {
+        return toast.error(data.message)
       }
     } catch (error) {
       return toast.error(error.message)
