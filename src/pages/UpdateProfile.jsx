@@ -1,13 +1,12 @@
-import axios from 'axios'
-import { useEffect, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
-
+import { updateUser } from '../api/user.api'
+import { UserContext } from '../context/UserContext'
 
 const UpdateProfile = () => {
+  const { user, setUser } = useContext(UserContext)
   const navigate = useNavigate()
-
   const [input, setInput] = useState({
     firstName: '',
     lastName: '',
@@ -20,7 +19,7 @@ const UpdateProfile = () => {
     bloodGroup: '',
     isOrganDonor: false,
   })
-  const { user } = useOutletContext()
+
   useEffect(() => {
     if (user) {
       const patientProfile = user.patientProfile || {}
@@ -49,33 +48,32 @@ const UpdateProfile = () => {
     })
   }
 
-  const updateProfile = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault()
-    const payload = {
-      ...(user),
-      firstName: input.firstName,
-      lastName: input.lastName,
-      email: input.email,
-      patientProfile: {
-        phone: input.phone,
-        address: input.address,
-        healthCardNumber: input.healthCardNumber,
-        dob: input.dob,
-        sex: input.sex,
-        bloodGroup: input.bloodGroup,
-        isOrganDonor: input.isOrganDonor,
-      },
-    }
-    try {
-      const { data } = await axios.put(
-        `http://localhost:3000/api/user/${user._id}`,
-        payload
-      )
-      toast.success(data.message)
-      return navigate('profile')
-    } catch (error) {
-      return toast.error(error.message)
-    }
+    const { success, message } = await updateUser(input, user._id)
+    if (success) {
+      setUser((prev) => {
+
+        return {
+          ...prev,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email: input.email,
+          patientProfile: {
+            ...prev.patientProfile,
+            phone: input.phone,
+            address: input.address,
+            healthCardNumber: input.healthCardNumber,
+            dob: input.dob,
+            sex: input.sex,
+            bloodGroup: input.bloodGroup,
+            isOrganDonor: input.isOrganDonor,
+          },
+        }
+      })
+      toast.success(message)
+      navigate('profile')
+    } else toast.error(message)
   }
 
   return (
@@ -83,7 +81,7 @@ const UpdateProfile = () => {
       <form
         action=""
         className="max-w-[600px] mx-auto flex flex-col items-center gap-5 p-5 rounded"
-        onSubmit={updateProfile}
+        onSubmit={handleUpdateProfile}
       >
         <h1 className="text-2xl text-center text-black font-bold">
           Update Your Profile
