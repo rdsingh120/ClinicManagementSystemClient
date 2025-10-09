@@ -1,36 +1,31 @@
-import { useState } from 'react'
-import axios from 'axios'
+import { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { signInUser } from '../api/user.api'
 import { toast } from 'react-toastify'
+import { UserContext } from '../context/UserContext'
 
 const SignInPage = () => {
   const navigate = useNavigate()
-  const [user, setUser] = useState({
+  const [credentials, setCredentials] = useState({
     email: '',
     password: '',
   })
+const {setUser} = useContext(UserContext)
 
-  const handleUserState = (e) =>
-    setUser({ ...user, [e.target.name]: e.target.value })
+  const handleCredentialsState = (e) =>
+    setCredentials({ ...credentials, [e.target.name]: e.target.value })
 
   const handleSignIn = async (e) => {
     e.preventDefault()
-    if (!user.email || !user.password) {
-      return toast.error('Enter valid email & password')
-    }
+
+    const { success, message, token, userFound } = await signInUser(credentials)
     
-    try {
-      const { data } = await axios.post(
-        'http://localhost:3000/api/signin',
-        user
-      )
-      if (data?.success) {
-        localStorage.setItem('token', data?.token)
-        toast.success(data?.message)
-        return navigate('/dashboard');
-      }
-    } catch (error) {
-      return toast.error(error.message)
+    
+    if(success) {
+      localStorage.setItem('token', token)
+      setUser(userFound)
+      toast.success(message)
+      navigate('/dashboard')
     }
   }
 
@@ -47,16 +42,16 @@ const SignInPage = () => {
           type="email"
           placeholder="Email"
           name="email"
-          value={user.email}
-          onChange={handleUserState}
+          value={credentials.email}
+          onChange={handleCredentialsState}
           className="border border-black px-4 py-2"
         />
         <input
           type="password"
           placeholder="Password"
           name="password"
-          value={user.password}
-          onChange={handleUserState}
+          value={credentials.password}
+          onChange={handleCredentialsState}
           className="border border-black px-4 py-2"
         />
         <input
