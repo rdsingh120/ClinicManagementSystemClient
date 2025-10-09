@@ -2,8 +2,12 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+
 
 const UpdateProfile = () => {
+  const navigate = useNavigate()
+
   const [input, setInput] = useState({
     firstName: '',
     lastName: '',
@@ -36,11 +40,11 @@ const UpdateProfile = () => {
   }, [user])
 
   const handleInputState = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setInput((prev) => {
       return {
         ...prev,
-        [name]: value,
+        [name]: type === 'checkbox' ? checked : value,
       }
     })
   }
@@ -48,6 +52,7 @@ const UpdateProfile = () => {
   const updateProfile = async (e) => {
     e.preventDefault()
     const payload = {
+      ...(user),
       firstName: input.firstName,
       lastName: input.lastName,
       email: input.email,
@@ -66,7 +71,8 @@ const UpdateProfile = () => {
         `http://localhost:3000/api/user/${user._id}`,
         payload
       )
-      return toast.success(data.message)
+      toast.success(data.message)
+      return navigate('profile')
     } catch (error) {
       return toast.error(error.message)
     }
