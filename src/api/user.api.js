@@ -74,8 +74,8 @@ export const signOutUser = () => {
 export const getCurrentUser = async () => {
   try {
     const token = localStorage.getItem('token')
-    
-    const { data } = await axios.get('http://localhost:3000/api/dashboard', {
+
+    const { data } = await axios.get('http://localhost:3000/api/me', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
