@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import UpdateProfile from './pages/UpdateProfile'
 import Profile from './pages/Profile'
-import Doctors from './pages/Doctors'
+import FindADoctorPage from './pages/FindADoctorPage'
 
 const App = () => {
   return (
@@ -47,7 +47,7 @@ const App = () => {
         >
           <Route path="" element={<Profile />} />
           <Route path="update-profile" element={<UpdateProfile />} />
-          <Route path="find-a-doctor" element={<Doctors />} />
+          <Route path="find-a-doctor" element={<FindADoctorPage />} />
         </Route>
       </Routes>
       <ToastContainer
