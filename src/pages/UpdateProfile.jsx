@@ -50,27 +50,10 @@ const UpdateProfile = () => {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault()
-    const { success, message } = await updateUser(input, user._id)
+    const { success, message, updatedUser } = await updateUser(input, user._id)
+    
     if (success) {
-      setUser((prev) => {
-
-        return {
-          ...prev,
-          firstName: input.firstName,
-          lastName: input.lastName,
-          email: input.email,
-          patientProfile: {
-            ...prev.patientProfile,
-            phone: input.phone,
-            address: input.address,
-            healthCardNumber: input.healthCardNumber,
-            dob: input.dob,
-            sex: input.sex,
-            bloodGroup: input.bloodGroup,
-            isOrganDonor: input.isOrganDonor,
-          },
-        }
-      })
+      setUser({ ...updatedUser })
       toast.success(message)
       navigate('profile')
     } else toast.error(message)
