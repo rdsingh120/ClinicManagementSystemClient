@@ -1,12 +1,10 @@
-import { useContext } from 'react'
-import { useOutletContext } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../context/UserContext'
+import { useContext } from 'react'
 
 const Profile = () => {
   const { user } = useContext(UserContext)
   const navigate = useNavigate()
-
 
   if (!user) {
     return <div>Loading...</div>
@@ -61,7 +59,9 @@ const Profile = () => {
         <div className="flex gap-40">
           <div className="flex flex-col gap-3">
             <span className="text-gray-500">Status</span>
-            <span className="text-lg">{user?.isProfileActive ? 'Yes' : 'No'}</span>
+            <span className="text-lg">
+              {user?.isProfileActive ? 'Active' : 'Inactive'}
+            </span>
           </div>
 
           <div className="flex flex-col gap-3">
