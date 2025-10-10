@@ -20,7 +20,11 @@ const SignUpPage = () => {
   const handleSignUp = async (e) => {
     e.preventDefault()
 
-    const data = await signUpUser(user)
+    const { success, message } = await signUpUser(user)
+    if (success) {
+      toast.success(message)
+      navigate('/signin')
+    } else toast.error(message)
   }
 
   return (
