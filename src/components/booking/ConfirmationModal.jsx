@@ -4,8 +4,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { fetchJSON, formatLocal, groupSlotsByDay, MOCK_PATIENT_ID } 
-  from '../../lib/booking.api';
-
+  from '../../api/booking.api';
+  
 export function ConfirmationModal({ open, onClose, result }) {
   if (!open) return null
 

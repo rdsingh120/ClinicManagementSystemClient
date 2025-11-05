@@ -8,7 +8,7 @@ import PublicRoute from './components/PublicRoute'
 import UpdateProfile from './pages/UpdateProfile'
 import Profile from './pages/Profile'
 import FindADoctorPage from './pages/FindADoctorPage'
-import BookAppointmentPage from '../components/booking/BookAppointmentPage';
+import BookAppointmentPage from './components/booking/BookAppointmentPage';
 
 const App = () => {
   return (
