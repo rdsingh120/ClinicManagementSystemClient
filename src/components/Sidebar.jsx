@@ -1,6 +1,7 @@
 import { CgProfile } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
+import { AiOutlineSchedule } from 'react-icons/ai'
 
 const Sidebar = () => {
   const navigate = useNavigate()
@@ -13,6 +14,14 @@ const Sidebar = () => {
         >
           <CgProfile className="text-xl" />
           <span className="text-lg">Find a doctor</span>
+        </div>
+
+       <div
+          onClick={() => navigate('/dashboard/book-appointment')}
+          className="bg-white rounded-lg px-4 py-1 cursor-pointer flex items-center gap-5"
+        >
+          <AiOutlineSchedule className="text-xl" />
+          <span className="text-lg">Book Appointment</span>
         </div>
 
         <div
