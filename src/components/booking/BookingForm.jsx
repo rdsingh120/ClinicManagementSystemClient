@@ -5,7 +5,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { fetchJSON, formatLocal, groupSlotsByDay, MOCK_PATIENT_ID } 
-  from '../../lib/booking.api';
+  from '../../api/booking.api'
+;
   
 export function BookingForm({ patientId = MOCK_PATIENT_ID, doctorId, slot, onBooked, disabled }) {
   const [notes, setNotes] = useState('')
