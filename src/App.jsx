@@ -8,6 +8,7 @@ import PublicRoute from './components/PublicRoute'
 import UpdateProfile from './pages/UpdateProfile'
 import Profile from './pages/Profile'
 import FindADoctorPage from './pages/FindADoctorPage'
+import BookAppointmentPage from '../components/booking/BookAppointmentPage';
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="" element={<Profile />} />
           <Route path="update-profile" element={<UpdateProfile />} />
           <Route path="find-a-doctor" element={<FindADoctorPage />} />
+          <Route path="/dashboard/book-appointment" element={<BookAppointmentPage />} />
         </Route>
       </Routes>
       <ToastContainer
