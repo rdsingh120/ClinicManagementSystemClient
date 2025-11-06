@@ -2,19 +2,24 @@ import { GiHamburgerMenu } from 'react-icons/gi'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { signOutUser } from '../api/user.api'
+import { useContext } from 'react'
+import { UserContext } from '../context/UserContext'
 
-const Navbar = ({name, role}) => {
+const Navbar = ({ name, role }) => {
   const navigate = useNavigate()
+  const { setUser } = useContext(UserContext)
+
   const HandleSignOut = async (e) => {
     e.preventDefault()
     const { success, message } = await signOutUser()
     if (success) {
+      setUser(null)
       toast.success(message)
       navigate('/signin')
     }
   }
 
-  
+
   return (
     <div className="bg-blue-500 h-[100px] pl-5 md:px-20 sticky top-0 flex justify-between">
       {/* Logo */}
