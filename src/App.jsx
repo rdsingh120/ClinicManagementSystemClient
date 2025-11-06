@@ -8,50 +8,36 @@ import PublicRoute from './components/PublicRoute'
 import UpdateProfile from './pages/UpdateProfile'
 import Profile from './pages/Profile'
 import FindADoctorPage from './pages/FindADoctorPage'
-import BookAppointmentPage from './components/booking/BookAppointmentPage';
+import BookAppointmentPage from './components/booking/BookAppointmentPage'
+import DoctorProfilePage from './pages/DoctorProfilePage'
+import ManageAvailability from './pages/ManageAvailability'
+import DoctorUpdateProfile from './pages/DoctorUpdateProfile'
 
 const App = () => {
   return (
     <>
       <Routes>
-        <Route
-          path="*"
-          element={
-            <PublicRoute>
-              <SignInPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/signin"
-          element={
-            <PublicRoute>
-              <SignInPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <SignUpPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/dashboard/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="" element={<Profile />} />
-          <Route path="update-profile" element={<UpdateProfile />} />
-          <Route path="find-a-doctor" element={<FindADoctorPage />} />
-          <Route path="/dashboard/book-appointment" element={<BookAppointmentPage />} />
+        {/* Public */}
+        <Route element={<PublicRoute />}>
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="*" element={<SignInPage />} />
+        </Route>
+
+        {/* Protected */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route index element={<Profile />} />
+            <Route path="update-profile" element={<UpdateProfile />} />
+            <Route path="find-a-doctor" element={<FindADoctorPage />} />
+            <Route path="book-appointment" element={<BookAppointmentPage />} />
+            <Route path="doctor-profile" element={<DoctorProfilePage />} />
+            <Route path="manage-availability" element={<ManageAvailability />} />
+            <Route path="update-doctor-profile" element={<DoctorUpdateProfile />} />
+          </Route>
         </Route>
       </Routes>
+
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -67,4 +53,5 @@ const App = () => {
     </>
   )
 }
+
 export default App
