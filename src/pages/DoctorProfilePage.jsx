@@ -3,10 +3,15 @@ import { UserContext } from '../context/UserContext'
 import { getDoctorProfile } from '../api/doctor.api'
 import { getAvailability } from '../api/availability.api'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { MdEdit } from 'react-icons/md'
 
-const Section = ({ title, children }) => (
+const Section = ({ title, action, children }) => (
     <section className="bg-white rounded-xl shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">{title}</h2>
+            {action}
+        </div>
         {children}
     </section>
 )
@@ -26,6 +31,7 @@ export default function DoctorProfilePage() {
     const [profile, setProfile] = useState(null)
     const [availability, setAvailability] = useState(null)
     const doctorId = user?._id || user?.id
+    const navigate = useNavigate()
 
     useEffect(() => {
         let mounted = true
@@ -60,7 +66,19 @@ export default function DoctorProfilePage() {
 
     return (
         <div className="bg-gray-50 flex-1 p-6 overflow-y-auto rounded-tl-2xl">
-            <Section title="Common Information">
+            <Section
+                title="Common Information"
+                action={
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard/update-doctor-profile')}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white"
+                    >
+                        <MdEdit className="text-lg" />
+                        <span className="text-sm font-medium">Edit Profile</span>
+                    </button>
+                }
+            >
                 <Row label="Full Name" value={`${user?.firstName || ''} ${user?.lastName || ''}`.trim()} />
                 <Row label="Email" value={user?.email} />
                 <Row label="Phone" value={profile?.phone} />
@@ -70,7 +88,18 @@ export default function DoctorProfilePage() {
                 <Row label="Bio" value={<p className="whitespace-pre-wrap">{profile?.bio}</p>} />
             </Section>
 
-            <Section title="Education">
+            <Section
+                title="Education"
+                action={
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard/update-doctor-profile')}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white"
+                    >
+                        <MdEdit className="text-lg" />
+                        <span className="text-sm font-medium">Edit Education</span>
+                    </button>
+                }>
                 {edu.length === 0 ? (
                     <div className="text-gray-500">No education added.</div>
                 ) : (
@@ -90,7 +119,18 @@ export default function DoctorProfilePage() {
                 )}
             </Section>
 
-            <Section title="Professional Experience">
+            <Section
+                title="Professional Experience"
+                action={
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard/update-doctor-profile')}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white"
+                    >
+                        <MdEdit className="text-lg" />
+                        <span className="text-sm font-medium">Edit Experience</span>
+                    </button>
+                }>
                 {exp.length === 0 ? (
                     <div className="text-gray-500">No experience added.</div>
                 ) : (
@@ -109,13 +149,24 @@ export default function DoctorProfilePage() {
                 )}
             </Section>
 
-            <Section title="Availability (Weekly)">
+            <Section
+                title="Availability (Recurring Weekly)"
+                action={
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard/manage-availability')}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white"
+                    >
+                        <MdEdit className="text-lg" />
+                        <span className="text-sm font-medium">Edit Availability</span>
+                    </button>
+                }
+            >
                 {!availability || !weekly.length ? (
                     <div className="text-gray-500">No availability configured.</div>
                 ) : (
                     <div className="grid md:grid-cols-2 gap-4">
                         {weekly.map((w, idx) => {
-                            // support either minute-based or start/end ISO coming back
                             const start =
                                 Number.isInteger(w.startMinute)
                                     ? `${String(Math.floor(w.startMinute / 60)).padStart(2, '0')}:${String(w.startMinute % 60).padStart(2, '0')}`
