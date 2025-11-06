@@ -58,7 +58,7 @@ export const signInUser = async (credentials) => {
       `${API_BASE}/signin`,
       credentials
     )
-
+    if (data?.token) localStorage.setItem('token', data.token) // new
     return data
   } catch (error) {
     return {
@@ -76,7 +76,7 @@ export const getCurrentUser = async () => {
   try {
     const token = localStorage.getItem('token')
 
-    const { data } = await axios.get(`${API_BASE}/api/me`, {
+    const { data } = await axios.get(`${API_BASE}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -124,7 +124,8 @@ export const updateUser = async (updatedProfile, id) => {
 
     const { data } = await axios.put(
       `${API_BASE}/user/${id}`,
-      payload
+      payload,
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } } // new
     )
 
     return data
