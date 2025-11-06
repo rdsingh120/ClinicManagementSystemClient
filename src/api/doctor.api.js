@@ -29,3 +29,22 @@ export const updateDoctorProfile = async (profile) => {
     }
 }
 
+// POST /api/doctors/me/profile/photo
+export const uploadDoctorPhoto = async (file) => {
+    try {
+        const fd = new FormData()
+        fd.append('photo', file)
+        const { data } = await axios.post(
+            `${API_BASE}/me/profile/photo`,
+            fd,
+            {
+                headers: {
+                    ...authHeader().headers
+                }
+            }
+        )
+        return data
+    } catch (error) {
+        return { success: false, message: error?.response?.data?.message || error.message }
+    }
+}

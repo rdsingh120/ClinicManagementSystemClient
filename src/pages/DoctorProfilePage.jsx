@@ -26,10 +26,15 @@ const Row = ({ label, value }) => (
 const fdate = (v) => (v ? new Date(v).toLocaleDateString() : '')
 const dayName = (n) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][n]
 
+// Build absolute API URL when backend returns a relative "/api/..." path
+const API_ROOT = (import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '')) || 'http://localhost:3000/api'
+const toAbsApi = (u) => (u?.startsWith('http') ? u : `${API_ROOT}${(u || '').replace(/^\/api/, '')}`)
+
 export default function DoctorProfilePage() {
     const { user } = useContext(UserContext)
     const [profile, setProfile] = useState(null)
     const [availability, setAvailability] = useState(null)
+    const [photoSrc, setPhotoSrc] = useState(null)
     const doctorId = user?._id || user?.id
     const navigate = useNavigate()
 
@@ -42,6 +47,34 @@ export default function DoctorProfilePage() {
             })()
         return () => { mounted = false }
     }, [])
+
+    // Fetch and blob the photo for reliable display with Authorization
+    useEffect(() => {
+        if (!profile?.photoUrl) {
+            setPhotoSrc(null)
+            return
+        }
+        let cancelled = false
+        let url = null
+            ; (async () => {
+                try {
+                    const resp = await fetch(toAbsApi(profile.photoUrl), {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                        cache: 'no-store'
+                    })
+                    if (!resp.ok) throw new Error('Photo request failed')
+                    const blob = await resp.blob()
+                    url = URL.createObjectURL(blob)
+                    if (!cancelled) setPhotoSrc(url)
+                } catch {
+                    setPhotoSrc(null)
+                }
+            })()
+        return () => {
+            cancelled = true
+            if (url) URL.revokeObjectURL(url)
+        }
+    }, [profile?.photoUrl])
 
     useEffect(() => {
         if (!doctorId) return
@@ -79,13 +112,35 @@ export default function DoctorProfilePage() {
                     </button>
                 }
             >
-                <Row label="Full Name" value={`${user?.firstName || ''} ${user?.lastName || ''}`.trim()} />
-                <Row label="Email" value={user?.email} />
-                <Row label="Phone" value={profile?.phone} />
-                <Row label="Medical Licence #" value={profile?.medicalLicenceNumber} />
-                <Row label="Specialty" value={profile?.specialty} />
-                <Row label="Timezone" value={profile?.timezone || 'America/Toronto'} />
-                <Row label="Bio" value={<p className="whitespace-pre-wrap">{profile?.bio}</p>} />
+                {/* New layout: big portrait on the left, info on the right */}
+                <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                    <div className="w-full md:w-56 lg:w-64 shrink-0">
+                        <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 border">
+                            <div className="pt-[130%]" />
+                            {photoSrc ? (
+                                <img
+                                    src={photoSrc}
+                                    alt="Profile"
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                    No Photo
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 w-full">
+                        <Row label="Full Name" value={`${user?.firstName || ''} ${user?.lastName || ''}`.trim()} />
+                        <Row label="Email" value={user?.email} />
+                        <Row label="Phone" value={profile?.phone} />
+                        <Row label="Medical Licence #" value={profile?.medicalLicenceNumber} />
+                        <Row label="Specialty" value={profile?.specialty} />
+                        <Row label="Timezone" value={profile?.timezone || 'America/Toronto'} />
+                        <Row label="Bio" value={<p className="whitespace-pre-wrap">{profile?.bio}</p>} />
+                    </div>
+                </div>
             </Section>
 
             <Section
@@ -167,14 +222,10 @@ export default function DoctorProfilePage() {
                 ) : (
                     <div className="grid md:grid-cols-2 gap-4">
                         {weekly.map((w, idx) => {
-                            const start =
-                                Number.isInteger(w.startMinute)
-                                    ? `${String(Math.floor(w.startMinute / 60)).padStart(2, '0')}:${String(w.startMinute % 60).padStart(2, '0')}`
-                                    : new Date(w.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            const end =
-                                Number.isInteger(w.endMinute)
-                                    ? `${String(Math.floor(w.endMinute / 60)).padStart(2, '0')}:${String(w.endMinute % 60).padStart(2, '0')}`
-                                    : new Date(w.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            const fmt = (m) =>
+                                `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+                            const start = Number.isInteger(w.startMinute) ? fmt(w.startMinute) : ''
+                            const end = Number.isInteger(w.endMinute) ? fmt(w.endMinute) : ''
                             return (
                                 <div key={idx} className="border rounded-lg p-4">
                                     <div className="font-medium mb-1">{dayName(w.dayOfWeek)}</div>
