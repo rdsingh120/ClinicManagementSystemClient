@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { getDoctorProfile, updateDoctorProfile } from '../api/doctor.api'
+import { getDoctorProfile, updateDoctorProfile, uploadDoctorPhoto } from '../api/doctor.api'
 import { UserContext } from '../context/UserContext'
+import { updateUserNames } from '../api/user.api'
 
 const Section = ({ title, children }) => (
-    <section className="bg-white rounded-xl shadow p-6 mb-6">
+    <section className="bg-white rounded-xl shadow p-6 mb-6 overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         {children}
     </section>
@@ -26,10 +27,18 @@ const Textarea = ({ label, ...props }) => (
 
 const dstr = (v) => (v ? new Date(v).toISOString().slice(0, 10) : '')
 
+const API_ROOT = (import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '')) || 'http://localhost:3000/api'
+const toAbsApi = (u) => (u?.startsWith('http') ? u : `${API_ROOT}${(u || '').replace(/^\/api/, '')}`)
+
 export default function DoctorUpdateProfile() {
-    const { user } = useContext(UserContext)
+    const { user, setUser } = useContext(UserContext)
+    const userId = user?._id || user?.id
+
     const [saving, setSaving] = useState(false)
     const [input, setInput] = useState({
+        firstName: '',
+        lastName: '',
+        workEmail: '',
         phone: '',
         medicalLicenceNumber: '',
         specialty: '',
@@ -38,6 +47,10 @@ export default function DoctorUpdateProfile() {
         education: [],
         experience: []
     })
+
+    const [photoUrl, setPhotoUrl] = useState(null)
+    const [photoSrc, setPhotoSrc] = useState(null)
+    const [preview, setPreview] = useState(null)
 
     useEffect(() => {
         let mounted = true
@@ -48,8 +61,12 @@ export default function DoctorUpdateProfile() {
                     return
                 }
                 const doc = res?.doctor || {}
+                const basic = res?.basic || {}
                 if (mounted) {
                     setInput({
+                        firstName: basic.firstName || user?.firstName || '',
+                        lastName: basic.lastName || user?.lastName || '',
+                        workEmail: doc.workEmail || '',
                         phone: doc.phone || '',
                         medicalLicenceNumber: doc.medicalLicenceNumber || '',
                         specialty: doc.specialty || '',
@@ -58,10 +75,44 @@ export default function DoctorUpdateProfile() {
                         education: Array.isArray(doc.education) ? doc.education : [],
                         experience: Array.isArray(doc.experience) ? doc.experience : []
                     })
+                    setPhotoUrl(doc.photoUrl || null)
                 }
             })()
         return () => { mounted = false }
     }, [])
+
+    useEffect(() => {
+        if (!photoUrl || preview) {
+            if (photoSrc) URL.revokeObjectURL(photoSrc)
+            setPhotoSrc(null)
+            return
+        }
+        let cancelled = false
+            ; (async () => {
+                try {
+                    const resp = await fetch(toAbsApi(photoUrl), {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                        cache: 'no-store'
+                    })
+                    if (!resp.ok) throw new Error('Photo request failed')
+                    const blob = await resp.blob()
+                    const url = URL.createObjectURL(blob)
+                    if (!cancelled) setPhotoSrc(url)
+                    else URL.revokeObjectURL(url)
+                } catch {
+                    setPhotoSrc(null)
+                }
+            })()
+        return () => { cancelled = true }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [photoUrl, preview])
+
+    useEffect(() => {
+        return () => {
+            if (preview) URL.revokeObjectURL(preview)
+            if (photoSrc) URL.revokeObjectURL(photoSrc)
+        }
+    }, [preview, photoSrc])
 
     const setField = (e) => setInput(s => ({ ...s, [e.target.name]: e.target.value }))
 
@@ -93,11 +144,58 @@ export default function DoctorUpdateProfile() {
         })
     const delExp = (i) => setInput(s => ({ ...s, experience: s.experience.filter((_, idx) => idx !== i) }))
 
+    const handlePick = async (file, inputEl) => {
+        if (!file) return
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file')
+            inputEl.value = ''
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Max 5MB')
+            inputEl.value = ''
+            return
+        }
+
+        if (preview) URL.revokeObjectURL(preview)
+        const localUrl = URL.createObjectURL(file)
+        setPreview(localUrl)
+
+        const res = await uploadDoctorPhoto(file)
+        if (!res?.success) {
+            toast.error(res?.message || 'Upload failed')
+            return
+        }
+
+        setPhotoUrl(res.photoUrl)
+        if (preview) URL.revokeObjectURL(preview)
+        setPreview(null)
+        toast.success('Photo updated')
+    }
+
     const onSubmit = async (e) => {
         e.preventDefault()
         setSaving(true)
 
+        // 1) Update first/last name on User
+        const nameRes = await updateUserNames(userId, {
+            firstName: input.firstName || '',
+            lastName: input.lastName || ''
+        })
+        if (!nameRes?.success) {
+            setSaving(false)
+            toast.error(nameRes?.message || 'Failed to update name')
+            return
+        }
+        setUser(prev => ({
+            ...prev,
+            firstName: input.firstName || '',
+            lastName: input.lastName || ''
+        }))
+
+        // 2) Update doctor profile
         const payload = {
+            workEmail: input.workEmail || undefined,
             phone: input.phone || undefined,
             medicalLicenceNumber: input.medicalLicenceNumber || undefined,
             specialty: input.specialty || undefined,
@@ -128,15 +226,56 @@ export default function DoctorUpdateProfile() {
 
     return (
         <div className="bg-gray-50 flex-1 p-6 overflow-y-auto rounded-tl-2xl">
-            <form onSubmit={onSubmit} className="max-w-3xl mx-auto">
+            <form onSubmit={onSubmit} className="max-w-4xl mx-auto">
                 <Section title="Common Information">
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <Input label="Phone" name="phone" value={input.phone} onChange={setField} />
-                        <Input label="Medical Licence #" name="medicalLicenceNumber" value={input.medicalLicenceNumber} onChange={setField} />
-                        <Input label="Specialty" name="specialty" value={input.specialty} onChange={setField} />
-                        <Input label="Timezone" name="timezone" value={input.timezone} onChange={setField} />
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start mb-6">
+                        <div className="w-full md:w-56 lg:w-64 shrink-0">
+                            <div className="w-full max-w-[256px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm">
+                                {(preview || photoSrc) ? (
+                                    <img
+                                        src={preview || photoSrc}
+                                        alt="Profile"
+                                        className="block w-full h-[340px] object-cover select-none"
+                                        draggable={false}
+                                    />
+                                ) : (
+                                    <div className="w-full h-[340px] flex items-center justify-center text-gray-400">
+                                        No Photo
+                                    </div>
+                                )}
+                            </div>
+
+                            <label className="inline-flex items-center mt-3 px-4 py-2 rounded-lg border cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const f = e.target.files?.[0]
+                                        handlePick(f, e.target)
+                                        e.target.value = ''
+                                    }}
+                                />
+                                Upload new photo
+                            </label>
+                        </div>
+
+                        <div className="flex-1 w-full">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Input label="First Name" name="firstName" value={input.firstName} onChange={setField} />
+                                <Input label="Last Name" name="lastName" value={input.lastName} onChange={setField} />
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Input label="Work Email" name="workEmail" type="email" value={input.workEmail} onChange={setField} />
+                                <Input label="Work Phone" name="phone" value={input.phone} onChange={setField} />
+                                <Input label="Medical Licence #" name="medicalLicenceNumber" value={input.medicalLicenceNumber} onChange={setField} />
+                                <Input label="Specialty" name="specialty" value={input.specialty} onChange={setField} />
+                                <Input label="Timezone" name="timezone" value={input.timezone} onChange={setField} />
+                            </div>
+                            <Textarea label="Biography" name="bio" value={input.bio} onChange={setField} />
+                        </div>
                     </div>
-                    <Textarea label="Biography" name="bio" value={input.bio} onChange={setField} />
                 </Section>
 
                 <Section title="Education">
