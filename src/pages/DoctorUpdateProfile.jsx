@@ -2,9 +2,10 @@ import { useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { getDoctorProfile, updateDoctorProfile, uploadDoctorPhoto } from '../api/doctor.api'
 import { UserContext } from '../context/UserContext'
+import { updateUserNames } from '../api/user.api'
 
 const Section = ({ title, children }) => (
-    <section className="bg-white rounded-xl shadow p-6 mb-6">
+    <section className="bg-white rounded-xl shadow p-6 mb-6 overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         {children}
     </section>
@@ -30,9 +31,14 @@ const API_ROOT = (import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '')) || 'ht
 const toAbsApi = (u) => (u?.startsWith('http') ? u : `${API_ROOT}${(u || '').replace(/^\/api/, '')}`)
 
 export default function DoctorUpdateProfile() {
-    const { user } = useContext(UserContext)
+    const { user, setUser } = useContext(UserContext)
+    const userId = user?._id || user?.id
+
     const [saving, setSaving] = useState(false)
     const [input, setInput] = useState({
+        firstName: '',
+        lastName: '',
+        workEmail: '',
         phone: '',
         medicalLicenceNumber: '',
         specialty: '',
@@ -42,10 +48,9 @@ export default function DoctorUpdateProfile() {
         experience: []
     })
 
-    // photo states
-    const [photoUrl, setPhotoUrl] = useState(null)   // server url/path
-    const [photoSrc, setPhotoSrc] = useState(null)   // blob url to display
-    const [preview, setPreview] = useState(null)     // local preview while uploading
+    const [photoUrl, setPhotoUrl] = useState(null)
+    const [photoSrc, setPhotoSrc] = useState(null)
+    const [preview, setPreview] = useState(null)
 
     useEffect(() => {
         let mounted = true
@@ -56,8 +61,12 @@ export default function DoctorUpdateProfile() {
                     return
                 }
                 const doc = res?.doctor || {}
+                const basic = res?.basic || {}
                 if (mounted) {
                     setInput({
+                        firstName: basic.firstName || user?.firstName || '',
+                        lastName: basic.lastName || user?.lastName || '',
+                        workEmail: doc.workEmail || '',
                         phone: doc.phone || '',
                         medicalLicenceNumber: doc.medicalLicenceNumber || '',
                         specialty: doc.specialty || '',
@@ -72,7 +81,6 @@ export default function DoctorUpdateProfile() {
         return () => { mounted = false }
     }, [])
 
-    // fetch server photo (unless we’re showing a local preview)
     useEffect(() => {
         if (!photoUrl || preview) {
             if (photoSrc) URL.revokeObjectURL(photoSrc)
@@ -136,7 +144,6 @@ export default function DoctorUpdateProfile() {
         })
     const delExp = (i) => setInput(s => ({ ...s, experience: s.experience.filter((_, idx) => idx !== i) }))
 
-    // Upload flow (not avatar — larger portrait)
     const handlePick = async (file, inputEl) => {
         if (!file) return
         if (!file.type.startsWith('image/')) {
@@ -170,7 +177,25 @@ export default function DoctorUpdateProfile() {
         e.preventDefault()
         setSaving(true)
 
+        // 1) Update first/last name on User
+        const nameRes = await updateUserNames(userId, {
+            firstName: input.firstName || '',
+            lastName: input.lastName || ''
+        })
+        if (!nameRes?.success) {
+            setSaving(false)
+            toast.error(nameRes?.message || 'Failed to update name')
+            return
+        }
+        setUser(prev => ({
+            ...prev,
+            firstName: input.firstName || '',
+            lastName: input.lastName || ''
+        }))
+
+        // 2) Update doctor profile
         const payload = {
+            workEmail: input.workEmail || undefined,
             phone: input.phone || undefined,
             medicalLicenceNumber: input.medicalLicenceNumber || undefined,
             specialty: input.specialty || undefined,
@@ -203,19 +228,18 @@ export default function DoctorUpdateProfile() {
         <div className="bg-gray-50 flex-1 p-6 overflow-y-auto rounded-tl-2xl">
             <form onSubmit={onSubmit} className="max-w-4xl mx-auto">
                 <Section title="Common Information">
-                    {/* New layout: large portrait at left; upload is not an avatar */}
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start mb-6">
                         <div className="w-full md:w-56 lg:w-64 shrink-0">
-                            <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 border">
-                                <div className="pt-[130%]" />
+                            <div className="w-full max-w-[256px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm">
                                 {(preview || photoSrc) ? (
                                     <img
                                         src={preview || photoSrc}
                                         alt="Profile"
-                                        className="absolute inset-0 w-full h-full object-cover"
+                                        className="block w-full h-[340px] object-cover select-none"
+                                        draggable={false}
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                    <div className="w-full h-[340px] flex items-center justify-center text-gray-400">
                                         No Photo
                                     </div>
                                 )}
@@ -238,7 +262,13 @@ export default function DoctorUpdateProfile() {
 
                         <div className="flex-1 w-full">
                             <div className="grid md:grid-cols-2 gap-4">
-                                <Input label="Phone" name="phone" value={input.phone} onChange={setField} />
+                                <Input label="First Name" name="firstName" value={input.firstName} onChange={setField} />
+                                <Input label="Last Name" name="lastName" value={input.lastName} onChange={setField} />
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Input label="Work Email" name="workEmail" type="email" value={input.workEmail} onChange={setField} />
+                                <Input label="Work Phone" name="phone" value={input.phone} onChange={setField} />
                                 <Input label="Medical Licence #" name="medicalLicenceNumber" value={input.medicalLicenceNumber} onChange={setField} />
                                 <Input label="Specialty" name="specialty" value={input.specialty} onChange={setField} />
                                 <Input label="Timezone" name="timezone" value={input.timezone} onChange={setField} />

@@ -133,3 +133,19 @@ export const updateUser = async (updatedProfile, id) => {
     return { success: false, message: error.message }
   }
 }
+
+/**
+ * Update only firstName/lastName for user with given id
+ */
+export const updateUserNames = async (id, { firstName, lastName }) => {
+  try {
+    const { data } = await axios.put(
+      `${API_BASE}/user/${id}`,
+      { firstName, lastName },
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    )
+    return data
+  } catch (error) {
+    return { success: false, message: error.message }
+  }
+}
