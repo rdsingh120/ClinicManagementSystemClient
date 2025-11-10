@@ -18,13 +18,16 @@ const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 
 // -------- time helpers (minutes <-> HH:mm) --------
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
+
+// IMPORTANT: upper clamp at 1439 so we never render invalid 24:00
 const minutesToHHMM = (mins) => {
     if (mins == null || isNaN(mins)) return ''
-    const mm = clamp(mins, 0, 1440)
+    const mm = clamp(mins, 0, 1439)
     const h = Math.floor(mm / 60)
     const m = mm % 60
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
+
 const hhmmToMinutes = (hhmm) => {
     if (!hhmm) return null
     const m = hhmm.match(/^(\d{1,2}):(\d{2})$/)
@@ -138,25 +141,18 @@ export default function ManageAvailability() {
         })
     }
 
+    // FIX: Do not auto-adjust the counterpart field. Only update the one that was changed.
     const setDayTime = (d, which, hhmm) => {
         setWeekly((prev) =>
             prev.map((w) => {
                 if (w.dayOfWeek !== d) return w
                 const mins = hhmmToMinutes(hhmm)
                 if (mins == null) return w
-                const next = { ...w }
                 if (which === 'start') {
-                    next.startMinute = mins
-                    if (next.endMinute != null && next.endMinute <= mins) {
-                        next.endMinute = clamp(mins + 30, mins + 1, 24 * 60)
-                    }
+                    return { ...w, startMinute: mins }
                 } else {
-                    next.endMinute = mins
-                    if (next.startMinute != null && mins <= next.startMinute) {
-                        next.startMinute = clamp(mins - 30, 0, mins - 1)
-                    }
+                    return { ...w, endMinute: mins }
                 }
-                return next
             })
         )
     }

@@ -12,6 +12,8 @@ import BookAppointmentPage from './components/booking/BookAppointmentPage'
 import DoctorProfilePage from './pages/DoctorProfilePage'
 import ManageAvailability from './pages/ManageAvailability'
 import DoctorUpdateProfile from './pages/DoctorUpdateProfile'
+import DoctorPublicProfilePage from './pages/DoctorPublicProfilePage'
+
 
 const App = () => {
   return (
@@ -34,6 +36,7 @@ const App = () => {
             <Route path="doctor-profile" element={<DoctorProfilePage />} />
             <Route path="manage-availability" element={<ManageAvailability />} />
             <Route path="update-doctor-profile" element={<DoctorUpdateProfile />} />
+            <Route path="doctors/:id" element={<DoctorPublicProfilePage />} />
           </Route>
         </Route>
       </Routes>
