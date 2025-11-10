@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 export const MOCK_PATIENT_ID = '66f0b5a0c0ffee1234567890';
 
 // Create an Axios instance
