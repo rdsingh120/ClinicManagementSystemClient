@@ -2,20 +2,27 @@
 // BookAppointmentPage.jsx (Default Export)
 // =====================================================
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { fetchJSON, formatLocal, groupSlotsByDay, MOCK_PATIENT_ID } 
-  from '../../api/booking.api';
-  
+import React, { useState } from 'react';
+import { BookingForm } from './BookingForm.jsx'
+import { ConfirmationModal } from './ConfirmationModal';
+import { DoctorPicker } from './DoctorPicker.jsx'
+import SlotCalendar from './SlotCalendar.jsx'
+import { formatLocal } from '../../api/booking.api';
+
 export default function BookAppointmentPage() {
-  const [doctorId, setDoctorId] = useState('')
-  const [slot, setSlot] = useState(null)
-  const [bookingResult, setBookingResult] = useState(null)
-  const [modalOpen, setModalOpen] = useState(false)
+  // store either '' or { id, name }
+  const [doctor, setDoctor] = useState('');
+  const [slot, setSlot] = useState(null);
+  const [bookingResult, setBookingResult] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // always keep a plain string id for children that need it
+  const doctorId = typeof doctor === 'string' ? doctor : (doctor?.id ?? '');
 
   function resetAfterClose() {
-    setModalOpen(false)
+    setModalOpen(false);
     // keep doctor selection for convenience, but clear slot
-    setSlot(null)
+    setSlot(null);
   }
 
   return (
@@ -27,7 +34,7 @@ export default function BookAppointmentPage() {
 
       {/* Step 1: Doctor */}
       <section className="rounded-2xl border p-4">
-        <DoctorPicker value={doctorId} onChange={setDoctorId} />
+        <DoctorPicker value={doctor} onChange={setDoctor} />
       </section>
 
       {/* Step 2: Slots */}
@@ -43,13 +50,20 @@ export default function BookAppointmentPage() {
       {/* Step 3: Notes & Book */}
       <section className="rounded-2xl border p-4">
         <div className="mb-3 text-sm text-gray-700">
-          <div><span className="font-semibold">Selected doctor:</span> {doctorId || '—'}</div>
-          <div><span className="font-semibold">Selected slot:</span> {slot ? `${formatLocal(slot.startTime)} → ${formatLocal(slot.endTime)}` : '—'}</div>
+          <div>
+            <span className="font-semibold">Selected doctor:</span>{' '}
+            {typeof doctor === 'string' ? '—' : (doctor?.name || '—')}
+          </div>
+          <div>
+            <span className="font-semibold">Selected slot:</span>{' '}
+            {slot ? `${formatLocal(slot.startTime)} → ${formatLocal(slot.endTime)}` : '—'}
+          </div>
         </div>
+
         <BookingForm
           doctorId={doctorId}
           slot={slot}
-          onBooked={(result) => { setBookingResult(result); setModalOpen(true) }}
+          onBooked={(result) => { setBookingResult(result); setModalOpen(true); }}
           disabled={!doctorId || !slot}
         />
       </section>
@@ -64,5 +78,5 @@ export default function BookAppointmentPage() {
         * Times shown in your local timezone. Backend stores UTC ISO strings.
       </footer>
     </div>
-  )
+  );
 }
