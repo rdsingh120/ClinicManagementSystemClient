@@ -3,15 +3,20 @@
 // =====================================================
 
 import React, { useState } from 'react';
-import { BookingForm } from './BookingForm.jsx'
+import { useLocation } from 'react-router-dom';
+import { BookingForm } from './BookingForm.jsx';
 import { ConfirmationModal } from './ConfirmationModal';
-import { DoctorPicker } from './DoctorPicker.jsx'
-import SlotCalendar from './SlotCalendar.jsx'
+import { DoctorPicker } from './DoctorPicker.jsx';
+import SlotCalendar from './SlotCalendar.jsx';
 import { formatLocal } from '../../api/booking.api';
 
 export default function BookAppointmentPage() {
+  // read preselected doctor from router state (if provided)
+  const { state } = useLocation();
+  const preselected = state?.doctor || ''; // either '' or { id, name }
+
   // store either '' or { id, name }
-  const [doctor, setDoctor] = useState('');
+  const [doctor, setDoctor] = useState(preselected);
   const [slot, setSlot] = useState(null);
   const [bookingResult, setBookingResult] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
