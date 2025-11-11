@@ -1,7 +1,11 @@
+// =====================================================
+// booking.api.js  (Axios + normalization + safe grouping)
+// =====================================================
+
 import axios from 'axios';
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-export const MOCK_PATIENT_ID = '66f0b5a0c0ffee1234567890';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+
 
 // Create an Axios instance
 const api = axios.create({
@@ -10,7 +14,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// --- Generic JSON helper ---
+// --- Generic JSON helper (kept compatible) ---
 export async function fetchJSON(path, options = {}) {
   try {
     const method = options.method || 'GET';
@@ -23,7 +27,6 @@ export async function fetchJSON(path, options = {}) {
     const { data } = await api(config);
     return data;
   } catch (err) {
-    // Standardized error handling
     const message =
       err.response?.data?.message ||
       err.message ||
@@ -32,10 +35,11 @@ export async function fetchJSON(path, options = {}) {
   }
 }
 
-// --- Local formatting helpers remain the same ---
+// --- Local formatting helper ---
 export function formatLocal(dt) {
   try {
     const d = new Date(dt);
+    if (isNaN(d)) return '';
     return d.toLocaleString(undefined, {
       weekday: 'short',
       month: 'short',
@@ -44,20 +48,75 @@ export function formatLocal(dt) {
       minute: '2-digit',
     });
   } catch {
-    return dt;
+    return '';
   }
 }
 
+/**
+ * Normalize raw slot data coming from backend.
+ * Ensures consistent {startTime,endTime} and filters invalid ones.
+ */
+export function normalizeSlots(res) {
+  const raw =
+    Array.isArray(res)
+      ? res
+      : Array.isArray(res?.data)
+      ? res.data
+      : Array.isArray(res?.slots)
+      ? res.slots
+      : (res && typeof res === 'object')
+      ? Object.values(res)
+      : [];
+
+  return raw
+    .map((s) => {
+      const st = s.startTime ?? s.start ?? s.start_time ?? null;
+      const et = s.endTime   ?? s.end   ?? s.end_time   ?? null;
+
+      const sd = st ? new Date(st) : null;
+      const ed = et ? new Date(et) : null;
+
+      if (!sd || !ed || isNaN(sd) || isNaN(ed)) return null;
+
+      // Re-emit as ISO for consistency
+      return {
+        startTime: sd.toISOString(),
+        endTime: ed.toISOString(),
+      };
+    })
+    .filter(Boolean);
+}
+
+/**
+ * Group slots by UTC day.
+ * Returns an OBJECT: { 'YYYY-MM-DD': [ {startTime,endTime}, ... ] }
+ * (This is what SlotCalendar.jsx expects.)
+ */
 export function groupSlotsByDay(slots) {
-  const map = new Map();
-  for (const s of slots) {
-    const dayKey = new Date(s.startTime).toISOString().slice(0, 10);
-    if (!map.has(dayKey)) map.set(dayKey, []);
-    map.get(dayKey).push(s);
+  const out = Object.create(null);
+
+  for (const s of slots || []) {
+    // Guard invalid entries
+    const sd = new Date(s.startTime ?? s.start);
+    const ed = new Date(s.endTime ?? s.end);
+    if (isNaN(sd) || isNaN(ed)) continue;
+
+    // UTC day key
+    const y = sd.getUTCFullYear();
+    const m = String(sd.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(sd.getUTCDate()).padStart(2, '0');
+    const dayKey = `${y}-${m}-${d}`;
+
+    (out[dayKey] ??= []).push({
+      startTime: sd.toISOString(),
+      endTime: ed.toISOString(),
+    });
   }
-  for (const [, arr] of map)
-    arr.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-  return Array.from(map.entries())
-    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
-    .map(([key, value]) => ({ day: key, slots: value }));
+
+  // Sort each day's slots chronologically
+  for (const key of Object.keys(out)) {
+    out[key].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  }
+
+  return out;
 }

@@ -267,7 +267,13 @@ export default function DoctorPublicProfilePage() {
                         </button>
                         <button
                             className="rounded-xl bg-blue-600 px-4 py-2 font-medium text-white shadow hover:bg-blue-700"
-                            onClick={() => navigate(`/dashboard/book-appointment?doctorId=${doctor._id}`)}
+                            onClick={() => navigate(`/dashboard/book-appointment`,
+                                {
+                                    state: {
+                                        doctor: {id: String(doctor._id),
+                                            name: `${doctor.firstName ?? ''} ${doctor.lastName ?? ''}`.trim(),
+                                        }}
+                                })}
                         >
                             Book appointment
                         </button>
