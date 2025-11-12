@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const signUpUser = async (newUser) => {
   if (
     !newUser.role ||
@@ -32,7 +33,7 @@ export const signUpUser = async (newUser) => {
     }
 
     const { data } = await axios.post(
-      'http://localhost:3000/api/signup',
+      `${API_BASE}/signup`,
       payload
     )
     return data
@@ -54,10 +55,10 @@ export const signInUser = async (credentials) => {
 
   try {
     const { data } = await axios.post(
-      'http://localhost:3000/api/signin',
+      `${API_BASE}/signin`,
       credentials
     )
-
+    if (data?.token) localStorage.setItem('token', data.token) // new
     return data
   } catch (error) {
     return {
@@ -75,7 +76,7 @@ export const getCurrentUser = async () => {
   try {
     const token = localStorage.getItem('token')
 
-    const { data } = await axios.get('http://localhost:3000/api/me', {
+    const { data } = await axios.get(`${API_BASE}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -93,7 +94,7 @@ export const getCurrentUser = async () => {
 export const getAllUsers = async (role) => {
   try {
     const { data } = await axios.get(
-      `http://localhost:3000/api/users/${role}`
+      `${API_BASE}/users/${role}`
     )
     return data
   } catch (error) {
@@ -122,10 +123,27 @@ export const updateUser = async (updatedProfile, id) => {
     }
 
     const { data } = await axios.put(
-      `http://localhost:3000/api/user/${id}`,
-      payload
+      `${API_BASE}/user/${id}`,
+      payload,
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } } // new
     )
 
+    return data
+  } catch (error) {
+    return { success: false, message: error.message }
+  }
+}
+
+/**
+ * Update only firstName/lastName for user with given id
+ */
+export const updateUserNames = async (id, { firstName, lastName }) => {
+  try {
+    const { data } = await axios.put(
+      `${API_BASE}/user/${id}`,
+      { firstName, lastName },
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    )
     return data
   } catch (error) {
     return { success: false, message: error.message }

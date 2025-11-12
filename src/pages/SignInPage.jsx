@@ -10,7 +10,7 @@ const SignInPage = () => {
     email: '',
     password: '',
   })
-const {setUser} = useContext(UserContext)
+  const { setUser } = useContext(UserContext)
 
   const handleCredentialsState = (e) =>
     setCredentials({ ...credentials, [e.target.name]: e.target.value })
@@ -18,14 +18,23 @@ const {setUser} = useContext(UserContext)
   const handleSignIn = async (e) => {
     e.preventDefault()
 
-    const { success, message, token, userFound } = await signInUser(credentials)
-    
-    
-    if(success) {
+    try {
+      const { success, message, token, userFound } = await signInUser(credentials)
+
+      // validate API response and show error if failed
+      if (!success || !token || !userFound) {
+        toast.error(message || 'Sign in failed')
+        return
+      }
+
+      // persist session and hydrate user context
       localStorage.setItem('token', token)
       setUser(userFound)
+
       toast.success(message)
-      navigate('/dashboard')
+      navigate('/dashboard', { replace: true }) // avoid navigating back to signin
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err.message || 'Sign in failed')
     }
   }
 
@@ -45,6 +54,7 @@ const {setUser} = useContext(UserContext)
           value={credentials.email}
           onChange={handleCredentialsState}
           className="border border-black px-4 py-2"
+          autoComplete="username" /* help browser fill */
         />
         <input
           type="password"
@@ -53,6 +63,7 @@ const {setUser} = useContext(UserContext)
           value={credentials.password}
           onChange={handleCredentialsState}
           className="border border-black px-4 py-2"
+          autoComplete="current-password" /* help browser fill */
         />
         <input
           type="submit"
