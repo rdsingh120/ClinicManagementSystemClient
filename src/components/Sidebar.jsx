@@ -46,6 +46,12 @@ const Sidebar = () => {
               icon={AiOutlineSchedule}
               text="Manage Availability"
             />
+            <NavItem
+              onClick={() => navigate('/dashboard/doctor-appointments')}
+              active={location.pathname.startsWith('/dashboard/doctor-appointments')}
+              icon={AiOutlineSchedule}
+              text="My Appointments"
+            />
           </>
         ) : (
           <>
@@ -61,6 +67,12 @@ const Sidebar = () => {
               active={location.pathname.startsWith('/dashboard/book-appointment')}
               icon={AiOutlineSchedule}
               text="Book Appointment"
+            />
+            <NavItem
+              onClick={() => navigate('/dashboard/patient-appointments')}
+              active={location.pathname.startsWith('/dashboard/patient-appointments')}
+              icon={AiOutlineSchedule}
+              text="My Appointments"
             />
             <NavItem
               onClick={() => navigate('/dashboard')}
