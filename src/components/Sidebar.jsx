@@ -4,6 +4,7 @@ import { AiOutlineSchedule } from 'react-icons/ai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
+import { AiFillHome } from 'react-icons/ai';
 
 const NavItem = ({ onClick, active, icon: Icon, text }) => (
   <div
@@ -52,6 +53,12 @@ const Sidebar = () => {
               icon={AiOutlineSchedule}
               text="My Appointments"
             />
+            <NavItem // Nav to Homepage
+              onClick={() => navigate('/')}
+              active={location.pathname === '/'}
+              icon={AiFillHome}
+              text="Homepage"
+/>
           </>
         ) : (
           <>
@@ -86,6 +93,12 @@ const Sidebar = () => {
               icon={MdEditDocument}
               text="Update Profile"
             />
+            <NavItem //Nav to Homepage
+              onClick={() => navigate('/')}
+              active={location.pathname === '/'}
+              icon={AiFillHome}
+              text="Homepage"
+              />
           </>
         )}
 
