@@ -50,3 +50,36 @@ export const getMyPastAppointments = async () => {
 
   return data.data || [];
 };
+export const cancelAppointment = async (appointmentId, reason) => {
+  const res = await fetch(`${API_BASE}/appointments/${appointmentId}/cancel`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ reason }),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || !data?.success) {
+    throw new Error(data?.message || "Failed to cancel appointment");
+  }
+
+  return data;
+};
+
+export const rescheduleAppointment = async (appointmentId, payload) => {
+  const res = await fetch(`${API_BASE}/appointments/${appointmentId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || !data?.success) {
+    throw new Error(data?.message || "Failed to reschedule appointment");
+  }
+
+  return data;
+};
