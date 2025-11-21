@@ -53,11 +53,8 @@ export const uploadDoctorPhoto = async (file) => {
 // GET /api/doctors/:id (public profile)
 export const getDoctorPublicProfile = async (id) => {
     try {
-        const { data } = await axios.get(`${API_ROOT}/users/doctor`, authHeader())
-        const users = data?.users || data
-        const doctor = Array.isArray(users) ? users.find((u) => u._id === id) : null
-        if (!doctor) return { success: false, message: 'Doctor not found' }
-        return { success: true, doctor }
+        const { data } = await axios.get(`${API_BASE}/${id}`, authHeader())
+        return data
     } catch (error) {
         return { success: false, message: error?.response?.data?.message || error.message }
     }
@@ -82,16 +79,29 @@ export const makeDoctorPhotoUrl = (id, v) => {
     return `${API_BASE}/${id}/photo${ver}`
 }
 
+// Search / list doctors for "Find a Doctor" page
+// GET /api/doctors/search
+export const searchDoctors = async ({ search, specialty, page = 1, limit = 12 } = {}) => {
+    try {
+        const params = new URLSearchParams()
+        if (search) params.append('search', search)
+        if (specialty) params.append('specialty', specialty)
+        params.append('page', page)
+        params.append('limit', limit)
 
-// NEW — Fetch all doctors (public)
-export const getDoctors = async () => {
-  try {
-    const { data } = await axios.get(`${API_ROOT}/users/doctor`);
-    return { success: true, doctors: data.users || [] };
-  } catch (err) {
-    return {
-      success: false,
-      message: err?.response?.data?.message || err.message
-    };
-  }
-};
+        const { data } = await axios.get(
+            `${API_BASE}/search?${params.toString()}`,
+            authHeader()
+        )
+
+        return data   // { success, doctors, page, pageSize, total, hasMore }
+    } catch (err) {
+        return {
+            success: false,
+            message: err?.response?.data?.message || err.message
+        }
+    }
+}
+
+// Optional convenience wrapper to get first page with no filters
+export const getDoctors = async () => searchDoctors()
