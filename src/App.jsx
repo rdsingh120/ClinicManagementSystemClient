@@ -15,12 +15,16 @@ import DoctorUpdateProfile from './pages/DoctorUpdateProfile'
 import DoctorPublicProfilePage from './pages/DoctorPublicProfilePage'
 import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
+import HomePage from './pages/HomePage'
 
 
 const App = () => {
   return (
     <>
       <Routes>
+
+        <Route path="/" element={<HomePage />} />
+
         {/* Public */}
         <Route element={<PublicRoute />}>
           <Route path="/signin" element={<SignInPage />} />

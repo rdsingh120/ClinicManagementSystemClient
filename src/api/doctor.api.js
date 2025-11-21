@@ -81,3 +81,17 @@ export const makeDoctorPhotoUrl = (id, v) => {
     const ver = v ? `?v=${v}` : ''
     return `${API_BASE}/${id}/photo${ver}`
 }
+
+
+// NEW — Fetch all doctors (public)
+export const getDoctors = async () => {
+  try {
+    const { data } = await axios.get(`${API_ROOT}/users/doctor`);
+    return { success: true, doctors: data.users || [] };
+  } catch (err) {
+    return {
+      success: false,
+      message: err?.response?.data?.message || err.message
+    };
+  }
+};
