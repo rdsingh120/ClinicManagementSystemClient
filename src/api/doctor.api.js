@@ -53,18 +53,17 @@ export const uploadDoctorPhoto = async (file) => {
 // GET /api/doctors/:id (public profile)
 export const getDoctorPublicProfile = async (id) => {
     try {
-        const { data } = await axios.get(`${API_BASE}/${id}`, authHeader())
+        const { data } = await axios.get(`${API_BASE}/${id}`)
         return data
     } catch (error) {
         return { success: false, message: error?.response?.data?.message || error.message }
     }
 }
 
-// GET /api/doctors/:id/photo
+// GET /api/doctors/:id/photo (public)
 export const getDoctorPhotoById = async (id) => {
     try {
         const { data } = await axios.get(`${API_BASE}/${id}/photo`, {
-            ...authHeader(),
             responseType: 'blob'
         })
         return { success: true, blob: data }
@@ -90,11 +89,10 @@ export const searchDoctors = async ({ search, specialty, page = 1, limit = 12 } 
         params.append('limit', limit)
 
         const { data } = await axios.get(
-            `${API_BASE}/search?${params.toString()}`,
-            authHeader()
+            `${API_BASE}/search?${params.toString()}`
         )
 
-        return data   // { success, doctors, page, pageSize, total, hasMore }
+        return data
     } catch (err) {
         return {
             success: false,

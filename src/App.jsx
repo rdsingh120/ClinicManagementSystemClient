@@ -25,6 +25,9 @@ const App = () => {
 
         <Route path="/" element={<HomePage />} />
 
+        {/* Public doctor profile (NO auth required) */}
+        <Route path="/doctors/:id" element={<DoctorPublicProfilePage />} />
+
         {/* Public */}
         <Route element={<PublicRoute />}>
           <Route path="/signin" element={<SignInPage />} />
@@ -42,7 +45,6 @@ const App = () => {
             <Route path="doctor-profile" element={<DoctorProfilePage />} />
             <Route path="manage-availability" element={<ManageAvailability />} />
             <Route path="update-doctor-profile" element={<DoctorUpdateProfile />} />
-            <Route path="doctors/:id" element={<DoctorPublicProfilePage />} />
             <Route path="doctor-appointments" element={<DoctorAppointmentsPage />} />
             <Route path="patient-appointments" element={<PatientAppointmentsPage />} />
           </Route>
