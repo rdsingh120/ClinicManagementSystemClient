@@ -270,7 +270,30 @@ export default function DoctorUpdateProfile() {
                                 <Input label="Work Email" name="workEmail" type="email" value={input.workEmail} onChange={setField} />
                                 <Input label="Work Phone" name="phone" value={input.phone} onChange={setField} />
                                 <Input label="Medical Licence #" name="medicalLicenceNumber" value={input.medicalLicenceNumber} onChange={setField} />
-                                <Input label="Specialty" name="specialty" value={input.specialty} onChange={setField} />
+
+                                {/* Specialty dropdown with same options as Find-a-Doctor */}
+                                <label className="block mb-3">
+                                    <div className="text-gray-600 mb-1">Specialty</div>
+                                    <select
+                                        name="specialty"
+                                        value={input.specialty}
+                                        onChange={setField}
+                                        className="border border-gray-300 rounded px-3 py-2 w-full"
+                                    >
+                                        <option value="">Select specialty</option>
+                                        <option value="General Practitioner">General Practitioner</option>
+                                        <option value="Internal Medicine">Internal Medicine</option>
+                                        <option value="Neurologist">Neurologist</option>
+                                        <option value="Cardiologist">Cardiologist</option>
+                                        <option value="Dermatologist">Dermatologist</option>
+                                        <option value="Pediatrician">Pediatrician</option>
+                                        <option value="Oncologist">Oncologist</option>
+                                        <option value="Psychiatrist">Psychiatrist</option>
+                                        <option value="Radiologist">Radiologist</option>
+                                        <option value="Surgeon">Surgeon</option>
+                                    </select>
+                                </label>
+
                                 <Input label="Timezone" name="timezone" value={input.timezone} onChange={setField} />
                             </div>
                             <Textarea label="Biography" name="bio" value={input.bio} onChange={setField} />
