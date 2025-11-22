@@ -27,6 +27,8 @@ export default function BookAppointmentPage() {
   const [bookingResult, setBookingResult] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
+
   // always keep a plain string id for children that need it
   const doctorId = typeof doctor === 'string' ? doctor : (doctor?.id ?? '');
 
@@ -55,6 +57,7 @@ export default function BookAppointmentPage() {
           value={slot}
           onChange={setSlot}
           disabled={!doctorId}
+          refreshKey={calendarRefreshKey}
         />
       </section>
 
@@ -75,7 +78,8 @@ export default function BookAppointmentPage() {
           patientId={patientId}
           doctorId={doctorId}
           slot={slot}
-          onBooked={(result) => { setBookingResult(result); setModalOpen(true); }}
+          onBooked={(result) => { setBookingResult(result); setModalOpen(true); setCalendarRefreshKey((k) => k + 1); }}
+          
           disabled={!doctorId || !slot}
         />
       </section>
