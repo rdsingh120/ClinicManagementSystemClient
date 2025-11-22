@@ -16,7 +16,7 @@ const Badge = ({ children }) => (
     </span>
 )
 
-/** Fetch relative API photos with Authorization */
+/** Fetch relative API photos WITHOUT auth (public endpoint) */
 function SecureImage({ src, alt, fallback = DEFAULT_AVATAR }) {
     const [blobUrl, setBlobUrl] = useState(null)
     const [usingFallback, setUsingFallback] = useState(false)
@@ -37,9 +37,7 @@ function SecureImage({ src, alt, fallback = DEFAULT_AVATAR }) {
 
             ; (async () => {
                 try {
-                    const resp = await fetch(url, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                    })
+                    const resp = await fetch(url)
                     if (!resp.ok) throw new Error(`Image fetch failed: ${resp.status}`)
                     const blob = await resp.blob()
                     const o = URL.createObjectURL(blob)
@@ -67,8 +65,15 @@ function SecureImage({ src, alt, fallback = DEFAULT_AVATAR }) {
         usingFallback || effectiveSrc === fallback ? 'object-contain bg-gray-50' : 'object-cover'
 
     return (
-        <div className="h-96 w-full overflow-hidden rounded-2xl">
-            <img src={effectiveSrc} alt={alt} className={`h-full w-full ${fitClass}`} loading="lazy" />
+        <div className="w-full overflow-hidden rounded-2xl bg-gray-50">
+            <div className="relative w-full aspect-[3/4]">
+                <img
+                    src={effectiveSrc}
+                    alt={alt}
+                    loading="lazy"
+                    className={`absolute inset-0 h-full w-full ${fitClass}`}
+                />
+            </div>
         </div>
     )
 }
@@ -92,9 +97,18 @@ function daysFromWeekly(weekly = []) {
     if (!Array.isArray(weekly) || weekly.length === 0) return []
     const set = new Set()
     weekly.forEach((w) => {
-        if (typeof w === 'string') { const d = normalizeDay(w); if (d) set.add(d); return }
-        if (Number.isInteger(w?.dayOfWeek)) { const d = fromDayOfWeek(w.dayOfWeek); if (d) set.add(d); return }
-        const d = normalizeDay(w?.day); if (d) set.add(d)
+        if (typeof w === 'string') {
+            const d = normalizeDay(w)
+            if (d) set.add(d)
+            return
+        }
+        if (Number.isInteger(w?.dayOfWeek)) {
+            const d = fromDayOfWeek(w.dayOfWeek)
+            if (d) set.add(d)
+            return
+        }
+        const d = normalizeDay(w?.day)
+        if (d) set.add(d)
     })
     return DAY_ORDER.filter((d) => set.has(d))
 }
@@ -113,7 +127,7 @@ export function DoctorCard({ doc }) {
         specialty = 'General Practitioner',
         clinicName,
         clinicAddress,
-        weeklyAvailability,
+        weeklyAvailability
     } = doctorProfile
 
     const coverSrc = isAbsoluteUrl(photoUrl) ? photoUrl : `/doctors/${_id}/photo`
@@ -135,7 +149,7 @@ export function DoctorCard({ doc }) {
 
     return (
         <article
-            className="group relative flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+            className="group relative flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             role="region"
             aria-label={`Doctor card for ${name || 'doctor'}`}
         >
@@ -173,7 +187,7 @@ export function DoctorCard({ doc }) {
                 {/* Goes to the public profile */}
                 <button
                     type="button"
-                    onClick={() => navigate(`/dashboard/doctors/${_id}`, { state: { doctor: doc } })}
+                    onClick={() => navigate(`/doctors/${_id}`, { state: { doctor: doc } })}
                     className="inline-flex h-10 w-10 items-center justify-center rounded-full border bg-blue-600 text-white shadow transition hover:bg-blue-700"
                     aria-label={name ? `View profile of Dr. ${name}` : 'View profile'}
                     title="View profile"

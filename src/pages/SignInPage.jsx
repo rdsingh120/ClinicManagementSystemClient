@@ -32,7 +32,7 @@ const SignInPage = () => {
       setUser(userFound)
 
       toast.success(message)
-      navigate('/dashboard', { replace: true }) // avoid navigating back to signin
+      window.location.href = "/"; // Redirect to homepage once signed in
     } catch (err) {
       toast.error(err?.response?.data?.message || err.message || 'Sign in failed')
     }
