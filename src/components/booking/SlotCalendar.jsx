@@ -34,10 +34,11 @@ function toDateInputValue(date) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function SlotCalendar({ doctorId, value, onChange, disabled }) {
+export default function SlotCalendar({ doctorId, value, onChange, disabled,refreshKey }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
   const [slots, setSlots]     = useState([]);
+  
 
   // default: today → +7 days
   const today = useMemo(() => new Date(), []);
@@ -80,7 +81,7 @@ export default function SlotCalendar({ doctorId, value, onChange, disabled }) {
       .finally(() => mounted && setLoading(false));
 
     return () => { mounted = false; };
-  }, [doctorId, fromDate, toDate]);
+  }, [doctorId, fromDate, toDate, refreshKey]);
 
   // group by day: { 'YYYY-MM-DD': [ ... ] } — safe even if slots is empty
   const groupedObj = useMemo(() => groupSlotsByDay(slots), [slots]);
