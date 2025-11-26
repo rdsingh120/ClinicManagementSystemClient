@@ -10,7 +10,7 @@ export function BookingForm({ patientId , doctorId, slot, onBooked, disabled }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const canSubmit = Boolean(patientId && doctorId && slot && !loading && !disabled);
+  const canSubmit = Boolean(patientId && doctorId && slot && !loading) && !disabled;
 
   async function handleSubmit(e) {
     e.preventDefault();

@@ -53,21 +53,17 @@ export const uploadDoctorPhoto = async (file) => {
 // GET /api/doctors/:id (public profile)
 export const getDoctorPublicProfile = async (id) => {
     try {
-        const { data } = await axios.get(`${API_ROOT}/users/doctor`, authHeader())
-        const users = data?.users || data
-        const doctor = Array.isArray(users) ? users.find((u) => u._id === id) : null
-        if (!doctor) return { success: false, message: 'Doctor not found' }
-        return { success: true, doctor }
+        const { data } = await axios.get(`${API_BASE}/${id}`)
+        return data
     } catch (error) {
         return { success: false, message: error?.response?.data?.message || error.message }
     }
 }
 
-// GET /api/doctors/:id/photo
+// GET /api/doctors/:id/photo (public)
 export const getDoctorPhotoById = async (id) => {
     try {
         const { data } = await axios.get(`${API_BASE}/${id}/photo`, {
-            ...authHeader(),
             responseType: 'blob'
         })
         return { success: true, blob: data }
@@ -81,3 +77,29 @@ export const makeDoctorPhotoUrl = (id, v) => {
     const ver = v ? `?v=${v}` : ''
     return `${API_BASE}/${id}/photo${ver}`
 }
+
+// Search / list doctors for "Find a Doctor" page
+// GET /api/doctors/search
+export const searchDoctors = async ({ search, specialty, page = 1, limit = 12 } = {}) => {
+    try {
+        const params = new URLSearchParams()
+        if (search) params.append('search', search)
+        if (specialty) params.append('specialty', specialty)
+        params.append('page', page)
+        params.append('limit', limit)
+
+        const { data } = await axios.get(
+            `${API_BASE}/search?${params.toString()}`
+        )
+
+        return data
+    } catch (err) {
+        return {
+            success: false,
+            message: err?.response?.data?.message || err.message
+        }
+    }
+}
+
+// Optional convenience wrapper to get first page with no filters
+export const getDoctors = async () => searchDoctors()

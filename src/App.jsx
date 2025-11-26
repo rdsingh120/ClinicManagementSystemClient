@@ -15,12 +15,19 @@ import DoctorUpdateProfile from './pages/DoctorUpdateProfile'
 import DoctorPublicProfilePage from './pages/DoctorPublicProfilePage'
 import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
+import HomePage from './pages/HomePage'
 
 
 const App = () => {
   return (
     <>
       <Routes>
+
+        <Route path="/" element={<HomePage />} />
+
+        {/* Public doctor profile (NO auth required) */}
+        <Route path="/doctors/:id" element={<DoctorPublicProfilePage />} />
+
         {/* Public */}
         <Route element={<PublicRoute />}>
           <Route path="/signin" element={<SignInPage />} />
@@ -38,7 +45,6 @@ const App = () => {
             <Route path="doctor-profile" element={<DoctorProfilePage />} />
             <Route path="manage-availability" element={<ManageAvailability />} />
             <Route path="update-doctor-profile" element={<DoctorUpdateProfile />} />
-            <Route path="doctors/:id" element={<DoctorPublicProfilePage />} />
             <Route path="doctor-appointments" element={<DoctorAppointmentsPage />} />
             <Route path="patient-appointments" element={<PatientAppointmentsPage />} />
           </Route>

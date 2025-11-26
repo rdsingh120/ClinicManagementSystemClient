@@ -2,24 +2,32 @@
 // BookAppointmentPage.jsx (Default Export)
 // =====================================================
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BookingForm } from './BookingForm.jsx';
 import { ConfirmationModal } from './ConfirmationModal';
 import { DoctorPicker } from './DoctorPicker.jsx';
 import SlotCalendar from './SlotCalendar.jsx';
 import { formatLocal } from '../../api/booking.api';
+import { UserContext } from '../../context/UserContext';
+
 
 export default function BookAppointmentPage() {
   // read preselected doctor from router state (if provided)
-  const { state } = useLocation();
+  const { state } = useLocation(); 
   const preselected = state?.doctor || ''; // either '' or { id, name }
+
+  const { user } = useContext(UserContext);
+  const patientId = user?._id || user?.id || '';
+
 
   // store either '' or { id, name }
   const [doctor, setDoctor] = useState(preselected);
   const [slot, setSlot] = useState(null);
   const [bookingResult, setBookingResult] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
 
   // always keep a plain string id for children that need it
   const doctorId = typeof doctor === 'string' ? doctor : (doctor?.id ?? '');
@@ -49,6 +57,7 @@ export default function BookAppointmentPage() {
           value={slot}
           onChange={setSlot}
           disabled={!doctorId}
+          refreshKey={calendarRefreshKey}
         />
       </section>
 
@@ -66,9 +75,11 @@ export default function BookAppointmentPage() {
         </div>
 
         <BookingForm
+          patientId={patientId}
           doctorId={doctorId}
           slot={slot}
-          onBooked={(result) => { setBookingResult(result); setModalOpen(true); }}
+          onBooked={(result) => { setBookingResult(result); setModalOpen(true); setCalendarRefreshKey((k) => k + 1); }}
+          
           disabled={!doctorId || !slot}
         />
       </section>

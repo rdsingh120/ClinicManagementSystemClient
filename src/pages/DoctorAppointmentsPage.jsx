@@ -1,3 +1,4 @@
+// src/pages/DoctorAppointmentsPage.jsx
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/UserContext";
 import { getMyDoctorSchedule } from "../api/appointment.api";
@@ -7,14 +8,18 @@ const DoctorAppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const profile = selectedPatient?.patientProfile || {};
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
         setError("");
+
         const data = await getMyDoctorSchedule();
-        setAppointments(data);
+        setAppointments(data || []);
       } catch (err) {
         console.error(err);
         setError(err.message || "Something went wrong");
@@ -26,7 +31,8 @@ const DoctorAppointmentsPage = () => {
     fetchAppointments();
   }, []);
 
-  const isDoctor = user && user.role && user.role.toLowerCase() === "doctor";
+  const isDoctor =
+    user && user.role && user.role.toLowerCase() === "doctor";
 
   const formatDate = (isoString) => {
     if (!isoString) return "-";
@@ -43,6 +49,7 @@ const DoctorAppointmentsPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start py-10">
       <div className="w-full max-w-5xl bg-white shadow-md rounded-lg p-6">
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
@@ -54,13 +61,15 @@ const DoctorAppointmentsPage = () => {
           </div>
         </div>
 
+        {/* Role warning */}
         {!isDoctor && (
           <div className="mb-4 rounded-md bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
             This page is intended for doctors. If you are a patient, please use
-            the appointment history page.
+            the My Appointments page.
           </div>
         )}
 
+        {/* Loading / error / empty states */}
         {loading && (
           <div className="text-center text-gray-500 py-10">Loading...</div>
         )}
@@ -77,6 +86,7 @@ const DoctorAppointmentsPage = () => {
           </div>
         )}
 
+        {/* Appointments table */}
         {!loading && !error && appointments.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 text-sm">
@@ -119,9 +129,13 @@ const DoctorAppointmentsPage = () => {
                         {formatTime(appt.endTime)}
                       </td>
                       <td className="px-4 py-2 align-top">
-                        <div className="font-medium text-gray-800">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPatient(patient)}
+                          className="font-medium text-blue-600 hover:underline"
+                        >
                           {fullName || "-"}
-                        </div>
+                        </button>
                         {patient.email && (
                           <div className="text-xs text-gray-500">
                             {patient.email}
@@ -155,6 +169,127 @@ const DoctorAppointmentsPage = () => {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Patient profile modal */}
+        {selectedPatient && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Patient Profile
+                </h3>
+                <button
+                  onClick={() => setSelectedPatient(null)}
+                  className="text-sm text-gray-500 hover:text-gray-800"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Left */}
+                <div className="md:w-1/3 flex flex-col items-center border-r md:border-r border-gray-200 pr-0 md:pr-6">
+                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                    <span className="text-3xl text-gray-500">
+                      {selectedPatient.firstName?.[0]?.toUpperCase() ??
+                        selectedPatient.lastName?.[0]?.toUpperCase() ??
+                        "P"}
+                    </span>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <div className="text-lg font-semibold text-gray-800">
+                      {selectedPatient.firstName}{" "}
+                      {selectedPatient.lastName}
+                    </div>
+                    {selectedPatient.email && (
+                      <div className="text-sm text-gray-600">
+                        {selectedPatient.email}
+                      </div>
+                    )}
+                    {profile.phone && (
+                      <div className="text-sm text-gray-600">
+                        {profile.phone}
+                      </div>
+                    )}
+                    {profile.address && (
+                      <div className="text-sm text-gray-600">
+                        {profile.address}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right */}
+                <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-sm">
+                  {profile.sex && (
+                    <div>
+                      <div className="text-gray-500 text-xs uppercase tracking-wide">
+                        Sex
+                      </div>
+                      <div className="text-gray-800">
+                        {profile.sex}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.dob && (
+                    <div>
+                      <div className="text-gray-500 text-xs uppercase tracking-wide">
+                        Date of Birth
+                      </div>
+                      <div className="text-gray-800">
+                        {new Date(profile.dob).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.bloodGroup && (
+                    <div>
+                      <div className="text-gray-500 text-xs uppercase tracking-wide">
+                        Blood Group
+                      </div>
+                      <div className="text-gray-800">
+                        {profile.bloodGroup}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.healthCardNumber && (
+                    <div>
+                      <div className="text-gray-500 text-xs uppercase tracking-wide">
+                        Health Card Number
+                      </div>
+                      <div className="text-gray-800">
+                        {profile.healthCardNumber}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.isOrganDonor !== undefined && (
+                    <div>
+                      <div className="text-gray-500 text-xs uppercase tracking-wide">
+                        Organ Donor
+                      </div>
+                      <div className="text-gray-800">
+                        {profile.isOrganDonor ? "Yes" : "No"}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setSelectedPatient(null)}
+                  className="px-4 py-2 rounded text-sm bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
