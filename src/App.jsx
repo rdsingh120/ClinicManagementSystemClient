@@ -16,6 +16,8 @@ import DoctorPublicProfilePage from './pages/DoctorPublicProfilePage'
 import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
 import HomePage from './pages/HomePage'
+import DoctorTestimonialsPage from './pages/DoctorTestimonialsPage'
+
 
 
 const App = () => {
@@ -47,6 +49,7 @@ const App = () => {
             <Route path="update-doctor-profile" element={<DoctorUpdateProfile />} />
             <Route path="doctor-appointments" element={<DoctorAppointmentsPage />} />
             <Route path="patient-appointments" element={<PatientAppointmentsPage />} />
+            <Route path="doctor-testimonials" element={<DoctorTestimonialsPage />} />
           </Route>
         </Route>
       </Routes>

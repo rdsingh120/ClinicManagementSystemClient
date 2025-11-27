@@ -1,6 +1,6 @@
 import { CgProfile } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
-import { AiOutlineSchedule } from 'react-icons/ai'
+import { AiOutlineSchedule, AiFillStar } from 'react-icons/ai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
@@ -58,7 +58,14 @@ const Sidebar = () => {
               active={location.pathname === '/'}
               icon={AiFillHome}
               text="Homepage"
-/>
+            />
+            <NavItem
+              onClick={() => navigate('/dashboard/doctor-testimonials')}
+              active={location.pathname.startsWith('/dashboard/doctor-testimonials')}
+              icon={AiFillStar}
+              text="My Testimonials"
+            />
+
           </>
         ) : (
           <>
