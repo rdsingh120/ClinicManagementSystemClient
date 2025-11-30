@@ -4,16 +4,21 @@ import { AiOutlineSchedule } from 'react-icons/ai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
-import { AiFillHome } from 'react-icons/ai';
+import { AiFillHome } from 'react-icons/ai'
+import { IoChevronForward } from 'react-icons/io5'
 
 const NavItem = ({ onClick, active, icon: Icon, text }) => (
   <div
     onClick={onClick}
-    className={`rounded-lg px-4 py-1 cursor-pointer flex items-center gap-5 ${active ? 'bg-blue-100' : 'bg-white'
-      }`}
+    className={`rounded-lg px-4 py-3 cursor-pointer flex items-center justify-between group transition-all ${
+      active ? 'bg-blue-600 text-white shadow-lg' : 'bg-blue-500 text-white hover:bg-blue-600'
+    }`}
   >
-    <Icon className="text-xl" />
-    <span className="text-lg">{text}</span>
+    <div className="flex items-center gap-4">
+      <Icon className="text-xl" />
+      <span className="text-base font-medium">{text}</span>
+    </div>
+    <IoChevronForward className={`text-lg transition-transform ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'}`} />
   </div>
 )
 
@@ -23,10 +28,25 @@ const Sidebar = () => {
   const { user } = useContext(UserContext)
   const role = user?.role
 
-  return (
-    <div className="w-full md:w-[300px] h-[calc(100vh-100px)] fixed top-[5.9rem] left-0 bg-blue-500 px-5">
-      <div className="mt-10 flex flex-col gap-5">
+  const getBreadcrumb = () => {
+    const pathSegments = location.pathname.split('/').filter(Boolean)
+    if (pathSegments.length === 0) return 'Home'
+    
+    const lastSegment = pathSegments[pathSegments.length - 1]
+    return lastSegment
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
 
+  return (
+    <div className="w-[300px] h-[calc(100vh-100px)] fixed top-[5.9rem] left-0 bg-blue-500 px-5 flex flex-col">
+      
+      {/* Divider */}
+      <div className="border-t border-blue-400 mb-6"></div>
+
+      {/* Navigation Items */}
+      <div className="flex flex-col gap-3">
         {role === 'DOCTOR' ? (
           <>
             <NavItem
@@ -53,16 +73,15 @@ const Sidebar = () => {
               icon={AiOutlineSchedule}
               text="My Appointments"
             />
-            <NavItem // Nav to Homepage
+            <NavItem
               onClick={() => navigate('/')}
               active={location.pathname === '/'}
               icon={AiFillHome}
               text="Homepage"
-/>
+            />
           </>
         ) : (
           <>
-            {/* Patient menu (your original options) */}
             <NavItem
               onClick={() => navigate('/dashboard/find-a-doctor')}
               active={location.pathname.startsWith('/dashboard/find-a-doctor')}
@@ -93,15 +112,14 @@ const Sidebar = () => {
               icon={MdEditDocument}
               text="Update Profile"
             />
-            <NavItem //Nav to Homepage
+            <NavItem
               onClick={() => navigate('/')}
               active={location.pathname === '/'}
               icon={AiFillHome}
               text="Homepage"
-              />
+            />
           </>
         )}
-
       </div>
     </div>
   )

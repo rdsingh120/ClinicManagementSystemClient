@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useContext } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getDoctorPublicProfile } from '../api/doctor.api'
 import { getAvailability } from '../api/availability.api'
+import { getDoctorTestimonials, submitTestimonial } from '../api/testimonials.api'
+import { UserContext } from '../context/UserContext'
 
 const DEFAULT_AVATAR =
     'https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png'
@@ -147,6 +149,66 @@ function ExperienceCard({ item }) {
     )
 }
 
+
+function TestimonialModal({
+    show,
+    ratingInput,
+    setRatingInput,
+    commentInput,
+    setCommentInput,
+    onSubmit,
+    onClose
+}) {
+    if (!show) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                <h2 className="mb-4 text-lg font-semibold">Write a Testimonial</h2>
+
+                <label className="block mb-4">
+                    <span className="text-sm">Rating (1–5)</span>
+                    <select
+                        value={ratingInput}
+                        onChange={(e) => setRatingInput(e.target.value)}
+                        className="mt-1 w-full rounded border px-2 py-2"
+                    >
+                        {[1, 2, 3, 4, 5].map(n => (
+                            <option key={n} value={n}>{n}</option>
+                        ))}
+                    </select>
+                </label>
+
+                <label className="block mb-4">
+                    <span className="text-sm">Comment (optional)</span>
+                    <textarea
+                        value={commentInput}
+                        onChange={(e) => setCommentInput(e.target.value)}
+                        rows={3}
+                        className="mt-1 w-full rounded border px-3 py-2"
+                    />
+                </label>
+
+                <div className="flex justify-end gap-2">
+                    <button
+                        className="rounded-lg bg-gray-200 px-4 py-2"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-white"
+                        onClick={onSubmit}
+                    >
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 const DayChip = ({ children }) => (
     <span className="inline-flex items-center rounded-md bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 ring-1 ring-indigo-100">
         {children}
@@ -159,12 +221,24 @@ export default function DoctorPublicProfilePage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const { state } = useLocation()
+    const { user } = useContext(UserContext)
 
     const [doctor, setDoctor] = useState(state?.doctor || null)
     const [loading, setLoading] = useState(!state?.doctor)
     const [error, setError] = useState('')
 
     const [weeklySummary, setWeeklySummary] = useState(null)
+
+    const [testimonials, setTestimonials] = useState([])
+    const [avgRating, setAvgRating] = useState(null)
+    const [showModal, setShowModal] = useState(false)
+    const [ratingInput, setRatingInput] = useState(5)
+    const [commentInput, setCommentInput] = useState("")
+
+    const existingUserTestimonial = useMemo(() => {
+    if (!user) return null;
+    return testimonials.find(t => t.patientId?._id === user._id);
+}, [testimonials, user]);
 
     const fullName = useMemo(() => {
         const fn = doctor?.firstName
@@ -201,6 +275,24 @@ export default function DoctorPublicProfilePage() {
             mounted = false
         }
     }, [id, state?.doctor])
+
+    useEffect(() => {
+    if (!doctor?._id) return
+    let mounted = true
+    ;(async () => {
+        const res = await getDoctorTestimonials(doctor._id)
+        if (mounted && res?.success) {
+            setTestimonials(res.testimonials)
+            if (res.testimonials.length) {
+                const avg =
+                    res.testimonials.reduce((a, t) => a + t.rating, 0) /
+                    res.testimonials.length
+                setAvgRating(avg.toFixed(1))
+            }
+        }
+    })()
+    return () => (mounted = false)
+    }, [doctor?._id])
 
     if (loading) {
         return (
@@ -239,8 +331,10 @@ export default function DoctorPublicProfilePage() {
     const photoSrc = dp.photoUrl && isAbs(dp.photoUrl) ? dp.photoUrl : `/doctors/${doctor._id}/photo`
 
     const availableDays = weeklySummary
+
+
         ? Object.entries(weeklySummary).filter(([, ranges]) => ranges?.length)
-        : []
+        : [];
 
     return (
         <div className="flex-1 overflow-y-auto">
@@ -390,6 +484,86 @@ export default function DoctorPublicProfilePage() {
                             </div>
                         </dl>
                     </Section>
+
+                    <Section title="Patient Testimonials">
+                        {avgRating && (
+                            <div className="mb-3 text-indigo-700 font-semibold">
+                                ⭐ Average Rating: {avgRating}/5
+                            </div>
+                        )}
+
+                        {!testimonials.length ? (
+                            <p className="text-gray-600">No testimonials yet.</p>
+                        ) : (
+                            <div className="flex overflow-x-auto space-x-4 pb-2">
+                                {testimonials.map((t) => (
+                                    <div
+                                        key={t._id}
+                                        className="min-w-[240px] rounded-xl border bg-indigo-50/60 p-4 shadow-sm"
+                                    >
+                                        <div className="font-semibold text-indigo-900">
+                                            {t.patientId?.firstName} {t.patientId?.lastName}
+                                        </div>
+                                        <div className="text-yellow-600 text-sm mb-2">
+                                            {'⭐'.repeat(t.rating)}
+                                        </div>
+                                        <p className="text-sm text-gray-700 break-words">
+                                            {t.comment}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {user && (
+                            <button
+                                className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+                                onClick={() => {
+                                    if (existingUserTestimonial) {
+                                        setRatingInput(existingUserTestimonial.rating);
+                                        setCommentInput(existingUserTestimonial.comment);
+                                    } else {
+                                        setRatingInput(5);
+                                        setCommentInput("");
+                                    }
+                                    setShowModal(true);
+                                }}
+                            >
+                                {existingUserTestimonial ? "Edit Testimonial" : "Write a Testimonial"}
+                            </button>
+                        )}
+                    </Section>
+
+                    <TestimonialModal
+                        show={showModal}
+                        ratingInput={ratingInput}
+                        setRatingInput={setRatingInput}
+                        commentInput={commentInput}
+                        setCommentInput={setCommentInput}
+                        onClose={() => setShowModal(false)}
+                        onSubmit={async () => {
+                            const res = await submitTestimonial({
+                                doctorId: doctor._id,
+                                rating: Number(ratingInput),
+                                comment: commentInput,
+                            });
+
+                            if (res?.success) {
+                                const r = await getDoctorTestimonials(doctor._id);
+                                if (r?.success) {
+                                    setTestimonials(r.testimonials);
+                                    const avg =
+                                        r.testimonials.reduce((a, t) => a + t.rating, 0) /
+                                        r.testimonials.length;
+                                    setAvgRating(avg.toFixed(1));
+                                }
+                            }
+
+                            setShowModal(false);
+                            setCommentInput("");
+                            setRatingInput(5);
+                        }}
+                    />
                 </aside>
             </main>
         </div>

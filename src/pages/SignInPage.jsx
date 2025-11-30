@@ -39,48 +39,66 @@ const SignInPage = () => {
   }
 
   return (
-    <div className="max-w-[900px] mx-auto">
-      <form
-        action=""
-        onSubmit={handleSignIn}
-        className="max-w-[500px] mt-[300px] mx-5 sm:mx-auto flex flex-col gap-3 p-5 border border-black "
-      >
-        <h1 className="text-2xl text-center">Sign In</h1>
-        <p className="text-center mb-5">Enter your credentials to continue</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-5">
+  <form
+    onSubmit={handleSignIn}
+    className="w-full max-w-[500px] bg-white rounded-xl shadow-xl p-8"
+  >
+    {/* Header */}
+    <div className="text-center mb-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+      <p className="text-gray-500">Enter your credentials to continue</p>
+    </div>
+
+    {/* Inputs */}
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="your.email@example.com"
           name="email"
           value={credentials.email}
           onChange={handleCredentialsState}
-          className="border border-black px-4 py-2"
-          autoComplete="username" /* help browser fill */
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          autoComplete="username"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           name="password"
           value={credentials.password}
           onChange={handleCredentialsState}
-          className="border border-black px-4 py-2"
-          autoComplete="current-password" /* help browser fill */
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          autoComplete="current-password"
         />
-        <input
-          type="submit"
-          value={'Sign In'}
-          className="bg-blue-500 px-4 py-2 text-white font-medium cursor-pointer"
-        />
-        <p className="text-center mt-2">
-          Don't have an account?{' '}
-          <span
-            onClick={() => navigate('/signup')}
-            className="text-blue-500 hover:underline cursor-pointer"
-          >
-            Create one
-          </span>
-        </p>
-      </form>
+      </div>
     </div>
+
+    {/* Submit */}
+    <button
+      type="submit"
+      className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg"
+    >
+      Sign In
+    </button>
+
+    {/* Footer */}
+    <p className="text-center mt-6 text-gray-600">
+      Don't have an account?{' '}
+      <span
+        onClick={() => navigate('/signup')}
+        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+      >
+        Create one
+      </span>
+    </p>
+  </form>
+</div>
   )
 }
 export default SignInPage
