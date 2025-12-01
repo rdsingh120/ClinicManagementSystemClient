@@ -28,83 +28,115 @@ const SignUpPage = () => {
   }
 
   return (
-    <div className="max-w-[900px] mx-auto">
-      <form
-        action=""
-        onSubmit={handleSignUp}
-        className="max-w-[500px] mt-[150px] mx-5 sm:mx-auto flex flex-col gap-3 p-5 border border-black "
-      >
-        <h1 className="text-2xl text-center">Sign Up</h1>
-        <p className="text-center mb-5">Sign up to continue</p>
+<div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-5 py-12">
+  <form
+    onSubmit={handleSignUp}
+    className="w-full max-w-[500px] bg-white rounded-xl shadow-xl p-8"
+  >
+    {/* Header */}
+    <div className="text-center mb-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+      <p className="text-gray-500">Sign up to get started</p>
+    </div>
+
+    {/* Inputs */}
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
         <select
           name="role"
           value={user.role}
           onChange={handleUserState}
-          className="border border-black px-4 py-2"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         >
-          <option value={''} disabled hidden>
-            Please Select
-          </option>
-          <option value="DOCTOR">I am a doctor</option>
-          <option value="PATIENT">I am a patient</option>
+          <option value="" disabled hidden>Please Select</option>
+          <option value="DOCTOR">Doctor</option>
+          <option value="PATIENT">Patient</option>
         </select>
-        <input
-          type="text"
-          placeholder="First Name"
-          name="firstName"
-          value={user.firstName}
-          onChange={handleUserState}
-          className="border border-black px-4 py-2"
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          name="lastName"
-          value={user.lastName}
-          onChange={handleUserState}
-          className="border border-black px-4 py-2"
-        />
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+          <input
+            type="text"
+            placeholder="John"
+            name="firstName"
+            value={user.firstName}
+            onChange={handleUserState}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+          <input
+            type="text"
+            placeholder="Doe"
+            name="lastName"
+            value={user.lastName}
+            onChange={handleUserState}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="your.email@example.com"
           name="email"
           value={user.email}
           onChange={handleUserState}
-          className="border border-black px-4 py-2"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Email</label>
         <input
           type="email"
-          placeholder="Confirm Email"
+          placeholder="Confirm your email"
           name="confirmEmail"
           value={user.confirmEmail}
           onChange={handleUserState}
-          className="border border-black px-4 py-2"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Create a password"
           name="password"
           value={user.password}
           onChange={handleUserState}
-          className="border border-black px-4 py-2"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
-        <input
-          type="submit"
-          value={'Sign Up'}
-          className="bg-blue-500 px-4 py-2 text-white font-medium cursor-pointer"
-        />
-        <p className="text-center mt-2">
-          Already have an account?{' '}
-          <span
-            onClick={() => navigate('/signin')}
-            className="text-blue-500 hover:underline cursor-pointer"
-          >
-            Sign In
-          </span>
-        </p>
-      </form>
+      </div>
     </div>
+
+    {/* Submit */}
+    <button
+      type="submit"
+      className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg"
+    >
+      Sign Up
+    </button>
+
+    {/* Footer */}
+    <p className="text-center mt-6 text-gray-600">
+      Already have an account?{' '}
+      <span
+        onClick={() => navigate('/signin')}
+        className="text-blue-600 font-semibold cursor-pointer hover:underline"
+      >
+        Sign In
+      </span>
+    </p>
+  </form>
+</div>
   )
 }
 export default SignUpPage
