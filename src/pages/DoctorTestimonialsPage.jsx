@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/UserContext";
-import { getMyDoctorTestimonials } from "../api/testimonial.api";
+import { getDoctorTestimonials } from "../api/testimonials.api";
 
 const DoctorTestimonialsPage = () => {
   const { user } = useContext(UserContext);
@@ -9,15 +9,20 @@ const DoctorTestimonialsPage = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-
-    if (!user) return;
+    if (!user?._id) return;
 
     const fetchTestimonials = async () => {
       try {
         setLoading(true);
         setError("");
-        const data = await getMyDoctorTestimonials(); 
-        setTestimonials(data);
+
+        const res = await getDoctorTestimonials(user._id);
+
+        if (!res?.success) {
+          throw new Error(res?.message || "Failed to load testimonials");
+        }
+
+        setTestimonials(res.testimonials || []);
       } catch (err) {
         console.error(err);
         setError(err.message || "Something went wrong");
@@ -28,7 +33,6 @@ const DoctorTestimonialsPage = () => {
 
     fetchTestimonials();
   }, [user]);
-
   const isDoctor =
     user && user.role && user.role.toLowerCase() === "doctor";
 
