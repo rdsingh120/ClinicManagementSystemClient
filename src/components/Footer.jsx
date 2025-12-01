@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 
 const Footer = () => {
   return (() => {
@@ -109,6 +110,37 @@ const Footer = () => {
             © {new Date().getFullYear()} ClinicMS — All rights reserved.
           </p>
           <p className="text-blue-300 text-xs mt-1">Built with ❤️ for healthcare professionals</p>
+          {/* Social Icons */}
+          <div className="mt-10 flex justify-center gap-6">
+            <a
+              target="_blank"
+              href="https://facebook.com"
+              className="text-blue-200 hover:text-white text-2xl transition"
+            >
+              <FaFacebook />
+            </a>
+            <a
+              target="_blank"
+              href="https://twitter.com"
+              className="text-blue-200 hover:text-white text-2xl transition"
+            >
+              <FaTwitter />
+            </a>
+            <a
+              target="_blank"
+              href="https://instagram.com"
+              className="text-blue-200 hover:text-white text-2xl transition"
+            >
+              <FaInstagram />
+            </a>
+            <a
+              target="_blank"
+              href="https://linkedin.com"
+              className="text-blue-200 hover:text-white text-2xl transition"
+            >
+              <FaLinkedin />
+            </a>
+          </div>
         </div>
       </footer>
     );
