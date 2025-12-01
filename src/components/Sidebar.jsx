@@ -1,6 +1,6 @@
 import { CgProfile } from 'react-icons/cg'
 import { MdEditDocument } from 'react-icons/md'
-import { AiOutlineSchedule } from 'react-icons/ai'
+import { AiOutlineSchedule, AiFillStar } from 'react-icons/ai'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
@@ -18,7 +18,11 @@ const NavItem = ({ onClick, active, icon: Icon, text }) => (
       <Icon className="text-xl" />
       <span className="text-base font-medium">{text}</span>
     </div>
-    <IoChevronForward className={`text-lg transition-transform ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'}`} />
+    <IoChevronForward
+      className={`text-lg transition-transform ${
+        active ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+      }`}
+    />
   </div>
 )
 
@@ -31,7 +35,7 @@ const Sidebar = () => {
   const getBreadcrumb = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean)
     if (pathSegments.length === 0) return 'Home'
-    
+
     const lastSegment = pathSegments[pathSegments.length - 1]
     return lastSegment
       .split('-')
@@ -41,7 +45,6 @@ const Sidebar = () => {
 
   return (
     <div className="w-[300px] h-[calc(100vh-100px)] fixed top-[5.9rem] left-0 bg-blue-500 px-5 flex flex-col">
-      
       {/* Divider */}
       <div className="border-t border-blue-400 mb-6"></div>
 
@@ -78,6 +81,12 @@ const Sidebar = () => {
               active={location.pathname === '/'}
               icon={AiFillHome}
               text="Homepage"
+            />
+            <NavItem
+              onClick={() => navigate('/dashboard/doctor-testimonials')}
+              active={location.pathname.startsWith('/dashboard/doctor-testimonials')}
+              icon={AiFillStar}
+              text="My Testimonials"
             />
           </>
         ) : (
