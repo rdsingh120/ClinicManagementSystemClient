@@ -9,11 +9,14 @@ const DoctorTestimonialsPage = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
+
+    if (!user) return;
+
     const fetchTestimonials = async () => {
       try {
         setLoading(true);
         setError("");
-        const data = await getMyDoctorTestimonials();
+        const data = await getMyDoctorTestimonials(); 
         setTestimonials(data);
       } catch (err) {
         console.error(err);
@@ -24,7 +27,7 @@ const DoctorTestimonialsPage = () => {
     };
 
     fetchTestimonials();
-  }, []);
+  }, [user]);
 
   const isDoctor =
     user && user.role && user.role.toLowerCase() === "doctor";
@@ -99,7 +102,7 @@ const DoctorTestimonialsPage = () => {
         {!loading && !error && testimonials.length > 0 && (
           <div className="space-y-4">
             {testimonials.map((t) => {
-              const patient = t.patientId || t.patient || {};
+              const patient = t.patientId || {};
               const fullName = `${patient.firstName || ""} ${
                 patient.lastName || ""
               }`.trim();
